@@ -1,4 +1,9 @@
 # new simulator
+# argument1: cbrflow (e.g. 1, 1.5, 2...)
+# argument2: variant (e.g. Tahoe, Reno, NewReno...)
+# examples to run this program:
+# ns exp1.tcl 1 Reno
+# ns exp1.tcl 1.5 NewReno 
 set ns [new Simulator]
 # define cbr flow rate and TCP variant
 set cbrflow [lindex $argv 0]
