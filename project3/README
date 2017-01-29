@@ -1,0 +1,54 @@
+Project 3
+-----------Experiment 1-------------
+In this experiment we need to analysis the performance of Tahoe, Reno, NewReno and Vegas under
+different load.
+                         N1(TCP)                N4(sink)
+                           \                    /
+                            \       10Mbps     /
+                             N2(CBR)----------N3(sink)
+                            /                  \
+                           /                    \
+                         N5                      N6
+The topology contains six nodes(N1 - N6) as shown in above figure. Bandwidth between each node 
+is set to 10 Mbps. A tcp stream is attached to N1 to a sink agent N4. CBR source is attached 
+to N2 to a sink N3.
+
+Methodology:
+We will start the CBR at a rate of 1Mbps and end with 10Mbps with increment of 0.5MB, and 
+record the throughput, latency and packet drop rate compare to CBR flow rate. 
+
+-----------Experiment 2-------------
+In experiment 2 we need to compare the fairness between different TCP variants.
+The topology is based on experiment 1, in addition we need to add another TCP 
+variant on N5 to a sink N6.
+
+Methodology:
+We will start the CBR at a rate of 1Mbps and end with 10Mbps with increment of 0.5MB, 
+then record the throughput, latency and packet drop rate of N1 and N5, and compare 
+these different pairs of TCP variants. 
+The pairs of TCP variants we are using are:
+Reno vs. Reno
+NewReno vs. Reno
+Vegas vs. Vegas
+NewReno vs. Vegas
+
+
+-----------Experiment 3-------------
+In experiment 3 we need to compare the performace of Reno and SACK by using two different 
+algorithm: DropTail and Random Early Drop.
+The topology is same from experiment 1 and having TCP flow from N1 to N4 and CBR flow from 
+N5 to N6.
+
+Methodology:
+The CBR flow rate is not relevant during experiment 3, thus we are going to set it to a
+constant rate(e.g. 5Mbps). We will use throughput, latency and packet 
+drop rate vs. time(s) graphics and compare Reno(DropTail), Reno(RED), SACK(DropTail), 
+SACK(RED), CBR(DropTail), CBR(RED) in this experiment.
+
+-----------Calculations-------------
+Throughput=(Total Bits Received)/RTT
+Latency=????
+Drop Rate=(Total Packets Sent - Total Packets Received)/(Total Packets Sent)
+
+
+
