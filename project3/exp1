@@ -1,4 +1,13 @@
 #!/bin/bash
+# parameters:
+# -t|--type: 
+#        the type of calculation you need to process
+#        "t": throughput
+# -f|--file:
+#        the file path that needs to parse thru awk
+# example:
+#        ./exp1 -t "t" -f ~/cs4700/project3/exp1_Reno_1.5.tr
+
 while [[ $# -ge 1 ]]
 do
 key="$1"
