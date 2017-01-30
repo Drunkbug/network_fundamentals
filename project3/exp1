@@ -44,9 +44,11 @@ done
 # $4 to
 # $6 pkgSize
 # $8 fid(1 is TCP)
+START_TIME=1
+END_TIME=4
 
 if [ ${OUT_TYPE} = "t" ]; then
-  awk '{if($1=="r" && $3=="2" && $4=="3" && $8=="1") totalPkgSize = totalPkgSize + $6 } END {printf "%f\n", totalPkgSize*8/((5-1)*1000000)}' ${FILE}
+  awk '{if($1=="r" && $3=="2" && $4=="3" && $8=="1") totalPkgSize = totalPkgSize + $6 } END {printf "%f\n", totalPkgSize*8/(("'"$END_TIME"'"-"'"$START_TIME"'")*1000000)}' ${FILE}
 
 fi
 
