@@ -50,6 +50,7 @@ $ns attach-agent $n1 $n1tcp
 set n4sink [new Agent/TCPSink]
 $ns attach-agent $n4 $n4sink
 $ns connect $n1tcp $n4sink
+$n1tcp set fid_ 1
 
 # set a ftp over TCP connection
 set n1ftp [new Application/FTP]
@@ -73,6 +74,7 @@ $ns attach-agent $n3 $n3null
 
 # set sink from n2 to n3
 $ns connect $n2udp $n3null
+$n2udp set fid_ 2
 
 
 # Schedule events for CBR and FTP
