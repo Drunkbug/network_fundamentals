@@ -7,8 +7,8 @@ is set to 10 Mbps. A tcp stream is attached to N1 to a sink agent N4. CBR source
 to N2 to a sink N3.
 
 *Methodology*
-We will start the CBR at a rate of 1Mbps and end with 10Mbps with increment of 0.5MB, 
-Then start TCP stream and record the data between TCP starts and TCP stream becomes 
+We will start the CBR at a rate of 1Mbps and end with 10Mbps with increment of 0.5MB. 
+Then, we will start TCP stream and record the data between TCP starts and TCP stream becomes 
 steady, record the throughput, latency and packet drop rate(y axis)
 compare to CBR flow rate(x axis). To avoid noise, we will test each 
 CBR rate multiple times and get the average, we will also calculate
@@ -20,7 +20,7 @@ The topology is based on experiment 1, in addition we need to add another TCP
 variant on N5 to a sink N6.
 
 *Methodology*
-The methodology is similiar to experiment 1,
+The methodology is similiar to experiment 1.
 We will start the CBR at a rate of 1Mbps and end with 10Mbps with increment of 0.5MB, 
 do each experiment multiple times, calculate average and standard deviation,
 then record the throughput, latency and packet drop rate of N1 and N5, and compare 
