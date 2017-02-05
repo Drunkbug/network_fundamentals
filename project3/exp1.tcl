@@ -10,6 +10,7 @@ set cbrflow [lindex $argv 0]
 set variant [lindex $argv 1]
 # output trace file
 set tf [open exp1_${variant}_${cbrflow}.tr w]
+puts "exp1_${variant}_${cbrflow}.tr"
 $ns trace-all $tf
 
 # finish 
@@ -80,14 +81,14 @@ $n2udp set fid_ 2
 # Schedule events for CBR and FTP
 $ns at 0.1 "$n2cbr start"
 $ns at 1.0 "$n1ftp start"
-$ns at 4.0 "$n1ftp stop"
-$ns at 4.5 "$n2cbr stop"
-$ns at 5.0 "finish"
+$ns at 6.0 "$n1ftp stop"
+$ns at 6.5 "$n2cbr stop"
+$ns at 7.0 "finish"
 
-puts "CBR packet size = [$n2cbr set packet_size_]"
-puts "TCP window size = [$n1tcp set window_]"
-puts "input0=$cbrflow"
-puts "input1=$variant"
+#puts "CBR packet size = [$n2cbr set packet_size_]"
+#puts "TCP window size = [$n1tcp set window_]"
+#puts "input0=$cbrflow"
+#puts "input1=$variant"
 
 $ns run
 
