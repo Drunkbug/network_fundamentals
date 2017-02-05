@@ -8,6 +8,8 @@
 # example:
 #        ./exp1 -t "t" -f ~/cs4700/project3/exp1_Reno_1.5.tr
 
+PROTOCOL="Reno"
+RESULT="./result.data"
 while [[ $# -ge 1 ]]
 do
 key="$1"
@@ -18,6 +20,10 @@ case $key in
     ;;
   -f|--file)
     FILE=$2
+    shift
+    ;;
+  -p|--protocol)
+    PROTOCOL=$2
     shift
     ;;
   --default)
@@ -38,6 +44,7 @@ done
 [[ ! -f "${FILE}" ]] \
 && echo ERROR: need a valid file 1>&2 \
 && exit 1
+
 # $1:event 
 # $2:time
 # $3 from
@@ -47,9 +54,29 @@ done
 START_TIME=1
 END_TIME=4
 
-if [ ${OUT_TYPE} = "t" ]; then
-  awk '{if($1=="r" && $3=="2" && $4=="3" && $8=="1") totalPkgSize = totalPkgSize + $6 } END {printf "%f\n", totalPkgSize*8/(("'"$END_TIME"'"-"'"$START_TIME"'")*1000000)}' ${FILE}
+I=0
+CBR_RATE=1
+while [ $(bc <<< "$CBR_RATE <= 11") -eq 1 ]
+do
+  while [ $I -lt 10 ]
+  do
+    I=$(($I+1))
+    if [ ${OUT_TYPE} = "t" ]; then
+      THROUGHPUT=$(awk '{
+      if($1=="r" && $3=="2" && $4=="3" && $8=="1") 
+        totalPkgSize = totalPkgSize + $6 
+      } 
+      END {
+        printf "%f\n", totalPkgSize*8/(("'"$END_TIME"'"-"'"$START_TIME"'")*1000000)
+      }' ${FILE})
+      echo "aaa"
+      echo $THROUGHPUT
+      TOTAL_THROUGHPUT=$(bc -l <<< "($TOTAL_THROUGHPUT+$THROUGHPUT)")
+    fi
+  done
+  I=0
+  CBR_RATE=$(bc -l <<< "($CBR_RATE+0.5)")
+done
 
-fi
 
 
