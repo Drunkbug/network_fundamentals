@@ -8,6 +8,7 @@ set ns [new Simulator]
 # define cbr flow rate and TCP variant
 set cbrflow [lindex $argv 0]
 set variant [lindex $argv 1]
+#set counter [lindex $argv 2]
 # output trace file
 set tf [open exp1_${variant}_${cbrflow}.tr w]
 puts "exp1_${variant}_${cbrflow}.tr"
@@ -64,10 +65,10 @@ $ns attach-agent $n2 $n2udp
 # setup cbr over n2udp
 set n2cbr [new Application/Traffic/CBR]
 $n2cbr attach-agent $n2udp
+$n2cbr set rate_ ${cbrflow}mb
 $n2cbr set type_ CBR
-$n2cbr set packet_size_ 1000
-$n2cbr set rate_ 1mb
-$n2cbr set random_ false
+#$n2cbr set packet_size_ 1000
+#$n2cbr set random_ false
 
 # set n3 to null
 set n3null [new Agent/Null]
