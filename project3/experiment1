@@ -1,0 +1,40 @@
+#!/bin/perl
+use strict;
+
+
+my $counter = 0;
+my $cbr_rate = 1;
+my $total_pkg_size = 0;
+
+while ($cbr_rate < 11) {
+  $counter = 0;
+  while ($counter <= 10) {
+    my $result=`ns ./exp1.tcl $cbr_rate Reno`;
+    my $filename = "./exp1_Reno_".$cbr_rate.".tr";
+    print "filename: ".$filename."\n";
+    open(my $fh, '<', $filename) or die "error while opening file $filename";
+    $total_pkg_size = 0;
+
+    while (my $row = <$fh>) {
+      my @elems = split ' ', $row; 
+      my $event = @elems[0];
+      my $time = @elems[1];
+      my $from = @elems[2];
+      my $to = @elems[3];
+      my $pkg_size= @elems[5];
+      my $fid = @elems[7];
+      if($event == "r" && $from  == "2" && $to =="3" && $fid=="1") {
+        $total_pkg_size = $total_pkg_size + $pkg_size;
+      }
+
+    }
+    my $throughput = ($total_pkg_size*8) / (5 * 1000000);
+    print $throughput;
+
+    print $result;
+    close($fh);
+    $counter = $counter + 1;
+  }
+  $cbr_rate = $cbr_rate + 0.5 ;
+
+}
