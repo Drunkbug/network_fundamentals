@@ -1,6 +1,5 @@
 #!/bin/perl
 use strict;
-use IO::Handle;
 
 
 my $counter = 0;
@@ -11,18 +10,15 @@ my $end_time = 6;
 
 while ($cbr_rate < 11) {
   $counter = 0;
-  while ($counter <= 2) {
+  while ($counter <= 0) {
     my $total_pkg_size = 0;
     my $result=`ns ./exp1.tcl $cbr_rate Reno`;
     my $filename = "./exp1_Reno_".$cbr_rate.".tr";
-    print "filename: ".$filename."\n";
     open(my $fh, '<', $filename) or die "error while opening file $filename";
-    $fh->flush;
 
     while (my $row = <$fh>) {
       my @elems = split ' ', $row; 
       my $event = @elems[0];
-      $end_time = @elems[1];
       my $from = @elems[2];
       my $to = @elems[3];
       my $pkg_size= @elems[5];
@@ -31,14 +27,14 @@ while ($cbr_rate < 11) {
         $total_pkg_size = $total_pkg_size + $pkg_size;
       }
 
-    }
-    print $result."\n";
+      $end_time = @elems[1];
 
-    close($fh);
+      }
+      close($fh);
+    my $throughput = ($total_pkg_size * 8) / (($end_time - $start_time) * 1000000);
+    print $result.": ".$throughput."\n";
+
     $counter = $counter + 1;
-    my $throughput = 0;
-    $throughput = ($total_pkg_size * 8) / (($end_time - $start_time) * 1000000);
-    print $throughput."\n";
   }
   $cbr_rate = $cbr_rate + 0.5 ;
 

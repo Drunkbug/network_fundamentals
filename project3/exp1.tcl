@@ -47,12 +47,14 @@ if {$variant == "Tahoe"} {
   set n1tcp [new Agent/TCP/Vegas]
 }
 
+
 $ns attach-agent $n1 $n1tcp
 # set sink from n1 to n4
 set n4sink [new Agent/TCPSink]
 $ns attach-agent $n4 $n4sink
 $ns connect $n1tcp $n4sink
 $n1tcp set fid_ 1
+$n1tcp set window_ 200
 
 # set a ftp over TCP connection
 set n1ftp [new Application/FTP]
@@ -68,7 +70,7 @@ $n2cbr attach-agent $n2udp
 $n2cbr set rate_ ${cbrflow}mb
 $n2cbr set type_ CBR
 #$n2cbr set packet_size_ 1000
-#$n2cbr set random_ false
+$n2cbr set random_ false
 
 # set n3 to null
 set n3null [new Agent/Null]
@@ -90,7 +92,7 @@ $ns at 7.0 "finish"
 #puts "TCP window size = [$n1tcp set window_]"
 #puts "input0=$cbrflow"
 #puts "input1=$variant"
-
+$defaultRNG seed 0
 $ns run
 
 
