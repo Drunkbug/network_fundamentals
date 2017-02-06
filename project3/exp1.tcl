@@ -1,6 +1,8 @@
 # new simulator
 # argument1: cbrflow (e.g. 1, 1.5, 2...)
 # argument2: variant (e.g. Tahoe, Reno, NewReno...)
+# argument3: start time
+# argument4: stop time
 # examples to run this program:
 # ns exp1.tcl 1 Reno
 # ns exp1.tcl 1.5 NewReno 
@@ -8,6 +10,8 @@ set ns [new Simulator]
 # define cbr flow rate and TCP variant
 set cbrflow [lindex $argv 0]
 set variant [lindex $argv 1]
+set start   [lindex $argv 2]
+set end     [lindex $argv 3]
 #set counter [lindex $argv 2]
 # output trace file
 set tf [open exp1_${variant}_${cbrflow}.tr w]
@@ -83,14 +87,15 @@ $n2udp set fid_ 2
 
 # Schedule events for CBR and FTP
 $ns at 0.1 "$n2cbr start"
-$ns at 1.0 "$n1ftp start"
-$ns at 6.0 "$n1ftp stop"
-$ns at 6.5 "$n2cbr stop"
-$ns at 7.0 "finish"
+$ns at $start "$n1ftp start"
+$ns at $end "$n1ftp stop"
+$ns at [expr $end + 1] "$n2cbr stop"
+$ns at [expr $end + 2] "finish"
 
 #puts "CBR packet size = [$n2cbr set packet_size_]"
 #puts "TCP window size = [$n1tcp set window_]"
 #puts "input0=$cbrflow"
+#puts [expr $end + 2] 
 #puts "input1=$variant"
 $defaultRNG seed 0
 $ns run
