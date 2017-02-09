@@ -5,62 +5,84 @@ use strict;
 my $counter = 0;
 my $cbr_rate = 1;
 my $total_pkg_size = 0;
-my $start_time = 50;
-my $end_time = 55;
+my $start_time = 10;
+my $end_time = 15;
 my $real_start_time = 0;
+my $max_end_time = 25;
+my $total_throughput = 0;
+my $flag = 0;
 
+# result of NS2 file
+my $filename2 = "./exp1_Reno.data";
+# open data file
+open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
+# data file header
+print $fh2 "cbr mean stddev\n";
 # outer while loop that keeps adding crb_rate by 0.5
 while ($cbr_rate < 11) {
-  my $start_time = 50;
-  my $end_time = 55;
-  $counter = 0;
+  $total_throughput = 0;
+  $start_time = 10;
+  $end_time = 15;
   #run NS2 simulator
   my $result=`ns ./exp1.tcl $cbr_rate Reno $start_time $end_time`;
 
+  # inner while loop that test each experiment multiple times
+  $total_pkg_size = 0;
+  $flag = 0;
+
   # result of NS2 file
   my $filename = "./exp1_Reno_".$cbr_rate.".tr";
-  # inner while loop that test each experiment multiple times
-  while ($counter <= 2) {
+  my @results;
 
-    my $total_pkg_size = 0;
-    my $flag = 0;
+  # open NS2 result file
+  open(my $fh, '<', $filename) or die "error while opening file $filename";
 
-    # open NS2 result file
-    open(my $fh, '<', $filename) or die "error while opening file $filename";
+  # read file line by line
+  while (my $row = <$fh>) {
+    my @elems = split ' ', $row; 
+    my $event = @elems[0];
+    my $event_time=@elems[1];
+    my $from = @elems[2];
+    my $to = @elems[3];
+    my $pkg_size= @elems[5];
+    my $fid = @elems[7];
+    if($event_time >= $start_time && $flag == 0) {
+      $flag = 1;
+      $real_start_time = $event_time;
+    }
 
-    # read file line by line
-    while (my $row = <$fh>) {
-      my @elems = split ' ', $row; 
-      my $event = @elems[0];
-      my $event_time=@elems[1];
-      my $from = @elems[2];
-      my $to = @elems[3];
-      my $pkg_size= @elems[5];
-      my $fid = @elems[7];
-      if($event_time >= $start_time && $flag == 0) {
-        $flag = 1;
-        $real_start_time = $event_time;
-        print $real_start_time;
+    if($event == "r" && $from  == "2" && $to =="3" && $fid=="1" && $flag == 1) {
+      $total_pkg_size = $total_pkg_size + $pkg_size;
+    }
+    if($event_time >= $end_time) {
+      $end_time = $event_time;
+      my $throughput = ($total_pkg_size * 8) / (($end_time - $real_start_time) * 1000000);
+      $total_throughput = $total_throughput + $throughput;
+      $start_time = $start_time + 5;
+      $end_time = $end_time + 5;
+      print "file:".$filename." throughput:".$throughput."\n";
+      push @results, $throughput;
+    }
+    
+    if($event_time >= $max_end_time) {
+      my $mean = $total_throughput / (scalar @results);
+      my $delta = 0;
+      foreach my $i(0 .. $#results) {
+        $delta = ($results[$i] - $mean)**2 + $delta;
       }
+      my $stddev = sqrt($delta / ((scalar @results) - 1));
+      print "file:".$filename." mean:".$mean.", std dev: ".$stddev."\n";
+      print $fh2 "$cbr_rate"." ".$mean." ".$stddev."\n";
+      last;
+    }
 
-      if($event == "r" && $from  == "2" && $to =="3" && $fid=="1" && $flag == 1) {
-        $total_pkg_size = $total_pkg_size + $pkg_size;
-      }
-      if($event_time >= $end_time) {
-        $end_time = $event_time;
-        print $end_time;
-        last;
-      }
+    } # end reading file in while loop
+    close($fh);
 
-      } # end reading file in while loop
-      close($fh);
-    my $throughput = ($total_pkg_size * 8) / (($end_time - $real_start_time) * 1000000);
-    print $result.": ".$throughput."\n";
-    $start_time = $start_time + 5;
-    $end_time = $end_time + 5;
-
-    $counter = $counter + 1;
-  }
   $cbr_rate = $cbr_rate + 0.5 ;
 
 }
+close($fh2);
+
+# clean up
+system("/bin/bash rm *.tr");
