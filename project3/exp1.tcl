@@ -58,7 +58,7 @@ set n4sink [new Agent/TCPSink]
 $ns attach-agent $n4 $n4sink
 $ns connect $n1tcp $n4sink
 $n1tcp set fid_ 1
-$n1tcp set window_ 200
+$n1tcp set window_ 100
 
 # set a ftp over TCP connection
 set n1ftp [new Application/FTP]
@@ -87,10 +87,12 @@ $n2udp set fid_ 2
 
 # Schedule events for CBR and FTP
 $ns at 0.1 "$n2cbr start"
-$ns at $start "$n1ftp start"
-$ns at $end "$n1ftp stop"
-$ns at [expr $end + 1] "$n2cbr stop"
-$ns at [expr $end + 2] "finish"
+$ns at 1 "$n1ftp start"
+$ns at 100 "$n1ftp stop"
+$ns at 105 "$n2cbr stop"
+$ns at 110 "finish"
+#$ns at [expr $end + 1] "$n2cbr stop"
+#$ns at [expr $end + 2] "finish"
 
 #puts "CBR packet size = [$n2cbr set packet_size_]"
 #puts "TCP window size = [$n1tcp set window_]"

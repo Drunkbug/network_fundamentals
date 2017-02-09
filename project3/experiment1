@@ -5,27 +5,29 @@ use strict;
 my $counter = 0;
 my $cbr_rate = 1;
 my $total_pkg_size = 0;
-my $start_time = 1;
-my $end_time = 2;
+my $start_time = 50;
+my $end_time = 55;
 my $real_start_time = 0;
 
 # outer while loop that keeps adding crb_rate by 0.5
 while ($cbr_rate < 11) {
+  my $start_time = 50;
+  my $end_time = 55;
   $counter = 0;
+  #run NS2 simulator
+  my $result=`ns ./exp1.tcl $cbr_rate Reno $start_time $end_time`;
+
+  # result of NS2 file
+  my $filename = "./exp1_Reno_".$cbr_rate.".tr";
   # inner while loop that test each experiment multiple times
   while ($counter <= 2) {
 
     my $total_pkg_size = 0;
-    #run NS2 simulator
-    my $result=`ns ./exp1.tcl $cbr_rate Reno $start_time $end_time`;
-
-    # result of NS2 file
-    my $filename = "./exp1_Reno_".$cbr_rate.".tr";
+    my $flag = 0;
 
     # open NS2 result file
     open(my $fh, '<', $filename) or die "error while opening file $filename";
 
-    my $flag = 0;
     # read file line by line
     while (my $row = <$fh>) {
       my @elems = split ' ', $row; 
@@ -35,25 +37,30 @@ while ($cbr_rate < 11) {
       my $to = @elems[3];
       my $pkg_size= @elems[5];
       my $fid = @elems[7];
-      if($event == "+" && $from  == "0" && $to =="1" && $fid=="1" && not $flag && $event_time > $start_time) {
+      if($event_time >= $start_time && $flag == 0) {
         $flag = 1;
         $real_start_time = $event_time;
+        print $real_start_time;
       }
 
-      if($event == "r" && $from  == "2" && $to =="3" && $fid=="1" && $flag) {
+      if($event == "r" && $from  == "2" && $to =="3" && $fid=="1" && $flag == 1) {
         $total_pkg_size = $total_pkg_size + $pkg_size;
       }
-      $end_time = $event_time;
-
+      if($event_time >= $end_time) {
+        $end_time = $event_time;
+        print $end_time;
+        last;
       }
+
+      } # end reading file in while loop
       close($fh);
     my $throughput = ($total_pkg_size * 8) / (($end_time - $real_start_time) * 1000000);
     print $result.": ".$throughput."\n";
+    $start_time = $start_time + 5;
+    $end_time = $end_time + 5;
 
     $counter = $counter + 1;
   }
-  $start_time++;
-  $end_time++;
   $cbr_rate = $cbr_rate + 0.5 ;
 
 }
