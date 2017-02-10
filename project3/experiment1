@@ -2,7 +2,7 @@
 use strict;
 
 # set initial value
-my $counter = 0;
+my $latency_counter = 0;
 my $cbr_rate = 1;
 my $total_pkg_size = 0;
 my $start_time = 10;
@@ -10,6 +10,7 @@ my $end_time = 15;
 my $real_start_time = 0;
 my $max_end_time = 25;
 my $total_throughput = 0;
+my $total_latency = 0;
 my $flag = 0;
 
 # result of NS2 file
@@ -17,12 +18,15 @@ my $filename2 = "./exp1_Reno.data";
 # open data file
 open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
 # data file header
-print $fh2 "cbr mean stddev\n";
+print $fh2 "cbr throughput throughput_stddev latency latency_stddev\n";
 # outer while loop that keeps adding crb_rate by 0.5
-while ($cbr_rate < 11) {
+while ($cbr_rate <= 10) {
   $total_throughput = 0;
+  $total_latency = 0;
+  $latency_counter = 0;
   $start_time = 10;
   $end_time = 15;
+
   #run NS2 simulator
   my $result=`ns ./exp1.tcl $cbr_rate Reno $start_time $end_time`;
 
@@ -32,11 +36,15 @@ while ($cbr_rate < 11) {
 
   # result of NS2 file
   my $filename = "./exp1_Reno_".$cbr_rate.".tr";
-  my @results;
+  my @results_throughput;
+  my @results_latency;
+  my @results_drop_rate;
+  my %latency_map;
 
   # open NS2 result file
   open(my $fh, '<', $filename) or die "error while opening file $filename";
 
+  $cbr_rate = $cbr_rate + 0.5 ;
   # read file line by line
   while (my $row = <$fh>) {
     my @elems = split ' ', $row; 
@@ -44,45 +52,91 @@ while ($cbr_rate < 11) {
     my $event_time=@elems[1];
     my $from = @elems[2];
     my $to = @elems[3];
-    my $pkg_size= @elems[5];
+    my $pkg_size = @elems[5];
     my $fid = @elems[7];
+    my $pkt_id = @elems[10];
     if($event_time >= $start_time && $flag == 0) {
       $flag = 1;
       $real_start_time = $event_time;
     }
 
+    # for throughput
     if($event == "r" && $from  == "2" && $to =="3" && $fid=="1" && $flag == 1) {
       $total_pkg_size = $total_pkg_size + $pkg_size;
     }
+    # for latency
+    if($event == "r" && $to =="0" && $fid=="1" && $flag == 1) {
+      $latency_counter = $latency_counter + 1;
+      $total_latency = $total_latency + ($event_time - $latency_map{$pkt_id});
+    }
+
+    if($event == "+" && $from =="0" && $fid=="1" && $flag == 1) {
+      $latency_map{$pkt_id} = $event_time;
+    }
+
+    # for package drop rate
+    
+    # end of one test
     if($event_time >= $end_time) {
       $end_time = $event_time;
+      # throughput
       my $throughput = ($total_pkg_size * 8) / (($end_time - $real_start_time) * 1000000);
       $total_throughput = $total_throughput + $throughput;
+      # latency
+      my $latency = $total_latency / $latency_counter;
+      my %latency_map;
+      print "file:".$filename." throughput:".$throughput.", latency:".$latency."\n";
+      push @results_throughput, $throughput;
+      push @results_latency, $latency;
+      $total_latency = 0;
+      $latency_counter = 0;
+      # package drop rate  
+      # increase start and end time
       $start_time = $start_time + 5;
       $end_time = $end_time + 5;
-      print "file:".$filename." throughput:".$throughput."\n";
-      push @results, $throughput;
     }
-    
+
+
+    # end of one cbr_rate test
     if($event_time >= $max_end_time) {
-      my $mean = $total_throughput / (scalar @results);
-      my $delta = 0;
-      foreach my $i(0 .. $#results) {
-        $delta = ($results[$i] - $mean)**2 + $delta;
+      # throughput
+      my $sum_throughput = 0;
+      foreach my $num (@results_throughput) {
+        $sum_throughput = $sum_throughput + $num;
       }
-      my $stddev = sqrt($delta / ((scalar @results) - 1));
-      print "file:".$filename." mean:".$mean.", std dev: ".$stddev."\n";
-      print $fh2 "$cbr_rate"." ".$mean." ".$stddev."\n";
+      my $mean_throughput  = $sum_throughput / (scalar @results_throughput);
+      my $delta_throughput = 0;
+      foreach my $i(0 .. $#results_throughput) {
+        $delta_throughput  = ($results_throughput[$i] - $mean_throughput )**2 + $delta_throughput;
+      }
+      my $stddev_throughput  = sqrt($delta_throughput  / ((scalar @results_throughput) - 1));
+
+      # latency
+      my $sum_latency = 0;
+      foreach my $num (@results_latency) {
+        $sum_latency = $sum_latency + $num;
+      }
+      my $mean_latency= $sum_latency / (scalar @results_latency);
+      my $delta_latency = 0;
+      foreach my $i(0 .. $#results_latency) {
+        $delta_latency = ($results_latency[$i] - $mean_latency)**2 + $delta_latency;
+      }
+      my $stddev_latency = sqrt($delta_latency / ((scalar @results_latency ) - 1));
+      print "----------------------------------------------\n";
+      print "file:".$filename." mean_throughput :".$mean_throughput .",  throughput stddev: ".$stddev_throughput ."\n";
+      print "mean_latency :".$mean_latency.", latency stddev: ".$stddev_latency."\n";
+      print "----------------------------------------------\n";
+
+      print $fh2 "$cbr_rate"." ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency."\n";
+      
+      # package drop rate  
+      # clean up
+      `rm *.tr`;
       last;
     }
 
     } # end reading file in while loop
     close($fh);
-
-  $cbr_rate = $cbr_rate + 0.5 ;
-
 }
 close($fh2);
 
-# clean up
-system("/bin/bash rm *.tr");
