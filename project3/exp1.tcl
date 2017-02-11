@@ -33,11 +33,11 @@ set n6 [$ns node]
 
 # link the nodes with 10Mbps speed
 # duplex-link node node bandwith(Mbps) latency(ms) drop_algorithm
-$ns duplex-link $n1 $n2 10Mb 20ms DropTail
-$ns duplex-link $n5 $n2 10Mb 20ms DropTail
-$ns duplex-link $n2 $n3 10Mb 20ms DropTail
-$ns duplex-link $n3 $n4 10Mb 20ms DropTail
-$ns duplex-link $n3 $n6 10Mb 20ms DropTail
+$ns duplex-link $n1 $n2 10Mb 10ms DropTail
+$ns duplex-link $n5 $n2 10Mb 10ms DropTail
+$ns duplex-link $n2 $n3 10Mb 10ms DropTail
+$ns duplex-link $n3 $n4 10Mb 10ms DropTail
+$ns duplex-link $n3 $n6 10Mb 30ms DropTail
 
 
 # setup TCP connection
@@ -52,13 +52,14 @@ if {$variant == "Tahoe"} {
 }
 
 
+$n1tcp set class_ 1
 $ns attach-agent $n1 $n1tcp
 # set sink from n1 to n4
 set n4sink [new Agent/TCPSink]
 $ns attach-agent $n4 $n4sink
 $ns connect $n1tcp $n4sink
 $n1tcp set fid_ 1
-$n1tcp set window_ 200
+$n1tcp set window_ 10000
 
 # set a ftp over TCP connection
 set n1ftp [new Application/FTP]
@@ -71,9 +72,14 @@ $ns attach-agent $n2 $n2udp
 # setup cbr over n2udp
 set n2cbr [new Application/Traffic/CBR]
 $n2cbr attach-agent $n2udp
-$n2cbr set rate_ ${cbrflow}mb
+
+if {$cbrflow == 10} {
+  $n2cbr set rate_ 9.9Mb
+} else {
+  $n2cbr set rate_ ${cbrflow}Mb
+}
 $n2cbr set type_ CBR
-#$n2cbr set packet_size_ 1000
+$n2cbr set packet_size_ 1000
 $n2cbr set random_ false
 
 # set n3 to null
@@ -99,7 +105,6 @@ $ns at 110 "finish"
 #puts "input0=$cbrflow"
 #puts [expr $end + 2] 
 #puts "input1=$variant"
-$defaultRNG seed 0
 $ns run
 
 
