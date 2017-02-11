@@ -1,7 +1,7 @@
 # Gnuplot script for plotting data in experiment 1
 set term png
 set grid
-set output "experiment1.png"
+set output "./pic/experiment1.png"
 set title "Throughput vs. CBR rate"
 set xlabel "CBR rate"
 set ylabel "Throughput"
