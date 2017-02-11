@@ -37,7 +37,7 @@ $ns duplex-link $n1 $n2 10Mb 10ms DropTail
 $ns duplex-link $n5 $n2 10Mb 10ms DropTail
 $ns duplex-link $n2 $n3 10Mb 10ms DropTail
 $ns duplex-link $n3 $n4 10Mb 10ms DropTail
-$ns duplex-link $n3 $n6 10Mb 30ms DropTail
+$ns duplex-link $n3 $n6 10Mb 10ms DropTail
 
 
 # setup TCP connection
