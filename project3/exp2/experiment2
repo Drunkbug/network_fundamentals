@@ -24,6 +24,7 @@ my $total_sent= 0;
 my $total_dropped = 0;
 my $flag = 0;
 my $variant_type = "1";
+my $variant2_result = "";
 
 
 # result of NS2 file
@@ -174,7 +175,7 @@ while ($cbr_rate <= 10) {
       print "mean_pdr :".$mean_pdr.", pdr stddev: ".$stddev_pdr."\n";
       print "----------------------------------------------\n";
 
-      print $fh2 "$cbr_rate"." ".$p2."2 ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
+      $variant2_result = $variant2_result."$cbr_rate"." ".$p2."1 ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
       $cbr_rate = $cbr_rate + 0.5 ;
       $variant_type = "1";
       
@@ -190,7 +191,8 @@ while ($cbr_rate <= 10) {
       print "mean_pdr :".$mean_pdr.", pdr stddev: ".$stddev_pdr."\n";
       print "----------------------------------------------\n";
 
-      print $fh2 "$cbr_rate"." ".$p1."1 ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
+      print $fh2 "$cbr_rate"." ".$p1."2 ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
+
       $variant_type = "2"; 
       last;
      }
@@ -199,6 +201,7 @@ while ($cbr_rate <= 10) {
     } # end reading file in while loop
     close($fh);
 }
+  print $fh2 $variant2_result;
 close($fh2);
 }
 
