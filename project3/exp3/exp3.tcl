@@ -1,22 +1,28 @@
 # new  simulator
 # argument1: variant
 # arugment2: queuing
-# arugment3: start time
-# argument4: stop time
+# arugment3: tcp start time
+# argument4: tcp stop time
+# argument5: cbr start time
+# argument6: cbr stop time
+# argument7: program end time
 # examples to run this program
-# ns exp3.tcl Reno DropTail
-# ns exp3.tcl Sack Red
+# ns exp3.tcl Reno DropTail 1 5 3 4 6
+# ns exp3.tcl Sack Red 1 30 10 20 31
 set ns [new Simulator]
 # define cbr flow rate and TCP variant
 set cbrflow 5
 set variant [lindex $argv 0]
 set queuing [lindex $argv 1]
-set starttime [lindex $argv 2]
-set stoptime [lindex $argv 3]
+set tcp_starttime [lindex $argv 2]
+set tcp_stoptime [lindex $argv 3]
+set cbr_starttime [lindex $argv 4]
+set cbr_stoptime [lindex $argv 5]
+set program_end_time [lindex $argv 6]
 
 # output trace file
-set tf [open exp3_${variant}_${queuing}_${starttime}_${stoptime}.tr w]
-puts "exp3_${variant}_${queuing}_${starttime}_${stoptime}.tr"
+set tf [open exp3_${variant}_${queuing}_${tcp_starttime}_${tcp_stoptime}.tr w]
+puts "exp3_${variant}_${queuing}_${tcp_starttime}_${tcp_stoptime}.tr"
 $ns trace-all $tf
 
 # finish
@@ -51,11 +57,9 @@ if {$queuing == "DropTail"} {
 # setup TCP connection
 if {$variant == "Reno"} {
     set n1tcp [new Agent/TCP/Reno]
-    set n5tcp [new Agent/TCP/Reno]
     set n4sink [new Agent/TCPSink]
 } elseif {$variant == "SACK"} {
     set n1tcp [new Agent/TCP/Sack1]
-    set n5tcp [new Agent/TCP/Sack1]
     set n4sink [new Agent/TCPSink/Sack1]
 }
 
@@ -97,10 +101,10 @@ $ns connect $n2udp $n3null
 $n2udp set fid_ 3
 
 #Schedule events for CBR and FTP
-$ns at 1 "$n1ftp start"
-$ns at 5 "$n2cbr start"
-$ns at 10 "$n2cbr stop"
-$ns at 15 "$n1ftp stop"
-$ns at 20 "finish"
+$ns at $tcp_starttime "$n1ftp start"
+$ns at $cbr_starttime "$n2cbr start"
+$ns at $cbr_stoptime "$n2cbr stop"
+$ns at $tcp_stoptime "$n1ftp stop"
+$ns at $program_end_time "finish"
 
 $ns run

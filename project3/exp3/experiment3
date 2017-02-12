@@ -1,0 +1,52 @@
+#!/bin/perl
+use strict;
+
+my $data_dir = "data";
+if (not -d $data_dir) {
+    mkdir $data_dir;
+}
+
+my @protocol = ("Reno", "Sack");
+my @queuing = ("DropTail", "RED");
+my @experience_count = 5;
+my @tcp_start_time = (5, 10, 15, 20, 25);
+my @tcp_end_time = (105, 110, 115, 120, 125);
+my @program_end_time = (107, 112, 117, 122, 127);
+my @cbr_start_time = (30, 35, 40, 45, 50);
+my @cbr_end_time = (80, 85, 90, 95, 100);
+
+foreach my $p (@protocol) {
+    for each my $q (@queuing) {
+        # set initial value
+        my ($p1,$p2) = split '/', $p;
+        my $latency_counter = 0;
+        my $total_pkg_size = 0;
+        my $start_time = 0;
+        my $end_time = 0;
+        my $tcp_start_time = 0;
+        my $tcp_end_time = 0;
+        my $cbr_start_time = 0;
+        my $cbr_end_time = 0;
+        my $program_end_time = 0;
+        my $total_throughput = 0;
+        my $total_latency = 0;
+        my $total_sent = 0;
+        my $total_dropped = 0;
+        my $flag = 0;
+
+        # result of NS2 file
+        my $filename2 = "./data/exp3_".$p."_".$q.".data";
+        # open data file
+        open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
+        # data file header
+        print $fh2 "cbr throughput throughput_stddev latency latency_stddev pdr pdr_stddev\n";
+        for ( $i = 0; $i < $experience_count; $i = $i + 1) {
+            $total_throughput = 0;
+            $total_latency = 0;
+            $latency_counter = 0;
+            $total_dropped = 0;
+            $tcp_st = $tcp_start_time[$i]
+        }
+        
+    }
+}
