@@ -21,7 +21,7 @@ my $flag = 0;
 # check whether the data folder exists or not
 my $data_dir = "data";
 if ( not -d $data_dir) {
-    mkdir $data_dir
+    mkdir $data_dir;
 }
 
 # result of NS2 file

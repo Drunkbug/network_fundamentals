@@ -1,6 +1,11 @@
 #!/bin/perl
 use strict;
 
+my $data_dir = "data";
+if (not -d $data_dir) {
+    mkdir $data_dir;
+}
+
 my @protocol = ("Reno/Reno", "NewReno/Reno", "Vegas/Vegas", "NewReno/Vegas");
 foreach my $p (@protocol) {
 # set initial value
@@ -40,7 +45,7 @@ while ($cbr_rate <= 10) {
 
 
   #run NS2 simulator
-  my $result=`ns ./exp2.tcl $cbr_rate $p1 $p2`;
+  my $result=`/course/cs4700f12/ns-allinone-2.35/bin/ns ./exp2.tcl $cbr_rate $p1 $p2`;
 
   # inner while loop that test each experiment multiple times
   $total_pkg_size = 0;
