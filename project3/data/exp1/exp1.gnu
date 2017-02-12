@@ -2,7 +2,7 @@
 # for throughput
 set term png
 set grid
-set output "./pic/experiment1_throughput.png"
+set output "../pic/experiment1_throughput.png"
 set title "Throughput vs. CBR rate"
 set xlabel "CBR rate(Mbps)"
 set ylabel "Throughput(Mbps)"
