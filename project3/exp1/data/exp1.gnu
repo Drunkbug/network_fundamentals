@@ -1,5 +1,6 @@
 # Gnuplot script for plotting data in experiment 1
 # for throughput
+system "mkdir -p pic"
 set term png
 set grid
 set output "./pic/experiment1_throughput.png"
