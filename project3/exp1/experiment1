@@ -43,7 +43,7 @@ while ($cbr_rate <= 10) {
 
 
   #run NS2 simulator
-  my $result=`ns ./exp1.tcl $cbr_rate $p`;
+  my $result=`/course/cs4700f12/ns-allinone-2.35/bin/ns ./exp1.tcl $cbr_rate $p`;
 
   # inner while loop that test each experiment multiple times
   $total_pkg_size = 0;
