@@ -12,7 +12,7 @@ my $start_time = 0;
 my $end_time = 0;
 my $real_start_time = 0;
 my $real_end_time = 0;
-my $max_end_time = 15;
+my $max_end_time = 55;
 my $total_throughput = 0;
 my $total_latency = 0;
 my $total_sent= 0;
@@ -169,7 +169,7 @@ while ($cbr_rate <= 10) {
       print "mean_pdr :".$mean_pdr.", pdr stddev: ".$stddev_pdr."\n";
       print "----------------------------------------------\n";
 
-      print $fh2 "$cbr_rate"." ".$p2." ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
+      print $fh2 "$cbr_rate"." ".$p2."2 ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
       $cbr_rate = $cbr_rate + 0.5 ;
       $variant_type = "1";
       
@@ -185,7 +185,7 @@ while ($cbr_rate <= 10) {
       print "mean_pdr :".$mean_pdr.", pdr stddev: ".$stddev_pdr."\n";
       print "----------------------------------------------\n";
 
-      print $fh2 "$cbr_rate"." ".$p1." ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
+      print $fh2 "$cbr_rate"." ".$p1."1 ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
       $variant_type = "2"; 
       last;
      }
