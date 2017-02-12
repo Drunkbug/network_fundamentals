@@ -1,9 +1,10 @@
 #!/bin/perl
 use strict;
 
-my @protocol = ("Tahoe", "Reno", "NewReno", "Vegas");
+my @protocol = ("Reno/Reno", "NewReno/Reno", "Vegas/Vegas", "NewReno/Vegas");
 foreach my $p (@protocol) {
 # set initial value
+my ($p1,$p2) = split '/', $p; 
 my $latency_counter = 0;
 my $cbr_rate = 1;
 my $total_pkg_size = 0;
@@ -11,20 +12,21 @@ my $start_time = 0;
 my $end_time = 0;
 my $real_start_time = 0;
 my $real_end_time = 0;
-my $max_end_time = 55;
+my $max_end_time = 15;
 my $total_throughput = 0;
 my $total_latency = 0;
 my $total_sent= 0;
 my $total_dropped = 0;
 my $flag = 0;
+my $variant_type = "1";
 
 
 # result of NS2 file
-my $filename2 = "./data/exp1_".$p.".data";
+my $filename2 = "./data/exp2_".$p1."_".$p2.".data";
 # open data file
 open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
 # data file header
-print $fh2 "cbr throughput throughput_stddev latency latency_stddev pdr pdr_stddev\n";
+print $fh2 "cbr variant throughput throughput_stddev latency latency_stddev pdr pdr_stddev\n";
 
 # outer while loop that keeps adding crb_rate by 0.5
 while ($cbr_rate <= 10) {
@@ -38,14 +40,14 @@ while ($cbr_rate <= 10) {
 
 
   #run NS2 simulator
-  my $result=`ns ./exp1.tcl $cbr_rate $p`;
+  my $result=`ns ./exp2.tcl $cbr_rate $p1 $p2`;
 
   # inner while loop that test each experiment multiple times
   $total_pkg_size = 0;
   $flag = 0;
 
   # result of NS2 file
-  my $filename = "./exp1_".$p."_".$cbr_rate.".tr";
+  my $filename = "./exp2_".$p1."_".$p2."_".$cbr_rate.".tr";
   my @results_throughput;
   my @results_latency;
   my @results_pdr;
@@ -70,25 +72,25 @@ while ($cbr_rate <= 10) {
     }
 
     # for throughput
-    if($event eq "r" && $from  == "2" && $to == "3" && $fid == "1" && $flag == 1) {
+    if($event eq "r" && $from  eq "2" && $to eq ($variant_type eq "1"? "3":"5") && $fid eq $variant_type && $flag == 1) {
       $total_pkg_size = $total_pkg_size + $pkg_size;
     }
 
     # for latency
-    if($event eq 'r' && $to eq "0" && $flag == 1) {
+    if($event eq 'r' && $to eq ($variant_type eq "1"? "0":"4") && $flag == 1 && $fid eq $variant_type) {
       $latency_counter = $latency_counter + 1;
       $total_latency = $total_latency + ($event_time - $latency_map{$pkt_id});
     }
 
-    if($event eq '+' && $from eq "0" && $flag == 1) {
+    if($event eq '+' && $from eq ($variant_type eq "1"? "0":"4") && $flag == 1 && $fid eq $variant_type) {
       $latency_map{$pkt_id} = $event_time;
     }
 
     # for package drop rate
-    if($event eq '+' && $from eq "0" && $flag == 1) {
+    if($event eq '+' && $from eq ($variant_type eq "1"? "0":"4") && $flag == 1 && $fid eq $variant_type) {
       $total_sent = $total_sent + 1;
     }
-    if($event eq 'd' && $fid eq "1" && $flag == 1) {
+    if($event eq 'd' && $fid eq $variant_type && $flag == 1 && $fid eq $variant_type) {
       $total_dropped = $total_dropped + 1;
     }
     # end of one test
@@ -107,7 +109,7 @@ while ($cbr_rate <= 10) {
       push @results_pdr, $pdr;
 
       # summary for one test
-      print "file:".$filename." throughput:".$throughput.", latency:".$latency." pdr:".$pdr."\n";
+      print "===".$variant_type."==="."file:".$filename." throughput:".$throughput.", latency:".$latency." pdr:".$pdr."\n";
 
       # initialize 
       $total_pkg_size = 0;
@@ -122,7 +124,6 @@ while ($cbr_rate <= 10) {
       $start_time = $start_time + 5;
       $end_time = $end_time + 5;
     }
-
 
     # end of one cbr_rate test
     if($event_time >= $max_end_time) {
@@ -159,19 +160,35 @@ while ($cbr_rate <= 10) {
       }
       my $stddev_pdr = sqrt($delta_pdr / ((scalar @results_pdr) - 1));
       
+      if ($variant_type eq "2") {
       # summary
       print "-------------------Summary--------------------\n";
-      print " mean_throughput :".$mean_throughput .",  throughput stddev: ".$stddev_throughput ."\n";
+      print "Variant2: ".$p2."\n";
+      print "mean_throughput :".$mean_throughput .",  throughput stddev: ".$stddev_throughput ."\n";
       print "mean_latency :".$mean_latency.", latency stddev: ".$stddev_latency."\n";
       print "mean_pdr :".$mean_pdr.", pdr stddev: ".$stddev_pdr."\n";
       print "----------------------------------------------\n";
 
-      print $fh2 "$cbr_rate"." ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
+      print $fh2 "$cbr_rate"." ".$p2." ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
       $cbr_rate = $cbr_rate + 0.5 ;
+      $variant_type = "1";
       
       # clean up
       `rm *.tr`;
       last;
+      } elsif ($variant_type eq "1") {
+      # summary
+      print "-------------------Summary--------------------\n";
+      print "Variant1: ".$p1."\n";
+      print "mean_throughput :".$mean_throughput .",  throughput stddev: ".$stddev_throughput ."\n";
+      print "mean_latency :".$mean_latency.", latency stddev: ".$stddev_latency."\n";
+      print "mean_pdr :".$mean_pdr.", pdr stddev: ".$stddev_pdr."\n";
+      print "----------------------------------------------\n";
+
+      print $fh2 "$cbr_rate"." ".$p1." ".$mean_throughput." ".$stddev_throughput." ".$mean_latency." ".$stddev_latency." ".$mean_pdr." ".$stddev_pdr."\n";
+      $variant_type = "2"; 
+      last;
+     }
     }
 
     } # end reading file in while loop
