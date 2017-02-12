@@ -18,6 +18,11 @@ my $total_sent= 0;
 my $total_dropped = 0;
 my $flag = 0;
 
+# check whether the data folder exists or not
+my $data_dir = "data";
+if ( not -d $data_dir) {
+    mkdir $data_dir
+}
 
 # result of NS2 file
 my $filename2 = "./data/exp1_".$p.".data";
