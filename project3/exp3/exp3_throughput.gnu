@@ -3,7 +3,7 @@
 system "mkdir -p pic"
 set term png
 set grid
-set output "./pic/experiment3_Reno_and_SACK_DropTail_and_RED.png"
+set output "./pic/experiment3_Reno_and_SACK_DropTail_and_RED_throughput.png"
 set title "Throughput(NewReno/Reno) vs. Time"
 set xlabel "Time(second)"
 set ylabel "Throughput(Mbps)"
