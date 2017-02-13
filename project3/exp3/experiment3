@@ -9,10 +9,10 @@ my @protocol = ("Reno", "SACK");
 my @queuing = ("DropTail", "RED");
 my $experience_count = 1;
 my @tcp_start_time = (5);#, 10, 15, 20, 25);
-my @tcp_end_time = (105);#, 110, 115, 120, 125);
-my @program_end_time = (107);#, 112, 117, 122, 127);
-my @cbr_start_time = (30);#, 35, 40, 45, 50);
-my @cbr_end_time = (80);#, 85, 90, 95, 100);
+my @tcp_end_time = (205);#, 110, 115, 120, 125);
+my @program_end_time = (207);#, 112, 117, 122, 127);
+my @cbr_start_time = (80);#, 35, 40, 45, 50);
+my @cbr_end_time = (140);#, 85, 90, 95, 100);
 
 foreach my $p (@protocol) {
     foreach my $q (@queuing) {
@@ -114,10 +114,9 @@ foreach my $p (@protocol) {
                     last;
                 }
 
-                if ($flag == 1 && $event_time - $second_count >= 1) {
+                if ($flag == 1 && $event_time - $second_count >= 10) {
                     # throughput
                     my $throughput = ($total_pkg_size * 8) / (($event_time - $second_count) * 1024 * 1024);
-                    $total_throughput = $total_throughput + $throughput;
                     # latency
                     my $latency = $total_latency / $latency_counter;
                     # package drop rate
@@ -131,7 +130,7 @@ foreach my $p (@protocol) {
                     $total_sent = 0;
                     $total_dropped = 0;
                     $second_count = $event_time;
-                    $duration_count = $duration_count + 1
+                    $duration_count = $duration_count + 5
                 }
             }
         }

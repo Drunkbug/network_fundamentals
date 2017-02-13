@@ -11,7 +11,7 @@
 # ns exp3.tcl Sack Red 1 30 10 20 31
 set ns [new Simulator]
 # define cbr flow rate and TCP variant
-set cbrflow 5
+set cbrflow 6
 set variant [lindex $argv 0]
 set queuing [lindex $argv 1]
 set tcp_starttime [lindex $argv 2]
