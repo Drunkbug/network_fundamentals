@@ -40,5 +40,9 @@ drop rate vs. time(s) graphics and compare Reno(DropTail), Reno(RED), SACK(DropT
 SACK(RED), CBR(DropTail), CBR(RED) in this experiment. 
 
 
-
+Team contributions:
+Chenxi Yuan: Write code and do experiment for experiment 3; write the introduction, 
+conclusion and experiment 3 part in the paper.
+Leyi Qiang: Write code and do experiments for experiment 1 and 2; write experiment 1
+and 2 parts in the paper.
 
