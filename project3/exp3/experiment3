@@ -16,6 +16,7 @@ my @cbr_end_time = (80);#, 85, 90, 95, 100);
 
 foreach my $p (@protocol) {
     foreach my $q (@queuing) {
+        print("protocol:".$p." queuing:".$q." start\n");
         # set initial value
         my ($p1,$p2) = split '/', $p;
         my $latency_counter = 0;
@@ -121,7 +122,7 @@ foreach my $p (@protocol) {
                     my $latency = $total_latency / $latency_counter;
                     # package drop rate
                     my $pdr = 100 * $total_dropped / $total_sent;
-                    print $fh2 $duration_count." ".$total_throughput." ".$latency." ".$pdr."\n";
+                    print $fh2 $duration_count." ".$throughput." ".$latency." ".$pdr."\n";
 
                     # initialize
                     $total_pkg_size = 0;
@@ -137,7 +138,6 @@ foreach my $p (@protocol) {
 
         # clean up
         `rm *.tr`;
-        last;
-
+        print("protocol:".$p." queuing:".$q." end\n");
     }
 }
