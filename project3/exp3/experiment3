@@ -130,7 +130,7 @@ foreach my $p (@protocol) {
                     $total_sent = 0;
                     $total_dropped = 0;
                     $second_count = $event_time;
-                    $duration_count = $duration_count + 5
+                    $duration_count = $duration_count + 10
                 }
             }
         }
