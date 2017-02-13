@@ -21,8 +21,8 @@ set cbr_stoptime [lindex $argv 5]
 set program_end_time [lindex $argv 6]
 
 # output trace file
-set tf [open exp3_${variant}_${queuing}_${tcp_starttime}_${tcp_stoptime}.tr w]
-puts "exp3_${variant}_${queuing}_${tcp_starttime}_${tcp_stoptime}.tr"
+set tf [open exp3_${variant}_${queuing}_${tcp_starttime}.tr w]
+puts "exp3_${variant}_${queuing}_${tcp_starttime}.tr"
 $ns trace-all $tf
 
 # finish

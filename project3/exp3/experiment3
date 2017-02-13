@@ -1,5 +1,4 @@
 #!/bin/perl
-use strict;
 
 my $data_dir = "data";
 if (not -d $data_dir) {
@@ -8,7 +7,7 @@ if (not -d $data_dir) {
 
 my @protocol = ("Reno", "Sack");
 my @queuing = ("DropTail", "RED");
-my @experience_count = 5;
+my $experience_count = 5;
 my @tcp_start_time = (5, 10, 15, 20, 25);
 my @tcp_end_time = (105, 110, 115, 120, 125);
 my @program_end_time = (107, 112, 117, 122, 127);
@@ -16,37 +15,132 @@ my @cbr_start_time = (30, 35, 40, 45, 50);
 my @cbr_end_time = (80, 85, 90, 95, 100);
 
 foreach my $p (@protocol) {
-    for each my $q (@queuing) {
+    foreach my $q (@queuing) {
         # set initial value
         my ($p1,$p2) = split '/', $p;
         my $latency_counter = 0;
         my $total_pkg_size = 0;
         my $start_time = 0;
         my $end_time = 0;
-        my $tcp_start_time = 0;
-        my $tcp_end_time = 0;
-        my $cbr_start_time = 0;
-        my $cbr_end_time = 0;
-        my $program_end_time = 0;
         my $total_throughput = 0;
         my $total_latency = 0;
         my $total_sent = 0;
         my $total_dropped = 0;
         my $flag = 0;
-
-        # result of NS2 file
-        my $filename2 = "./data/exp3_".$p."_".$q.".data";
+        my $fh2;
         # open data file
-        open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
-        # data file header
-        print $fh2 "cbr throughput throughput_stddev latency latency_stddev pdr pdr_stddev\n";
+        my $i;
         for ( $i = 0; $i < $experience_count; $i = $i + 1) {
-            $total_throughput = 0;
-            $total_latency = 0;
-            $latency_counter = 0;
-            $total_dropped = 0;
-            $tcp_st = $tcp_start_time[$i]
+
+            # result of NS2 file
+            my $filename2 = "./data/exp3_".$p."_".$q.".data";
+            open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
+
+            # data file header
+            print $fh2 "start_time throughput latency pdr\n";
+
+            my $tcp_start = $tcp_start_time[$i];
+            my $tcp_end = $tcp_end_time[$i];
+            my $program_end = $program_end_time[$i];
+            my $cbr_start = $cbr_start_time[$i];
+            my $cbr_end = $cbr_end_time[$i];
+
+            # initialize
+            my $total_pkg_size = 0;
+            my $total_latency = 0;
+            my $latency_counter = 0;
+            my $total_sent = 0;
+            my $total_dropped = 0;
+            my $flag = 0;
+            my $second_counter = 0;
+
+            # run NS2 simulator
+            my $result = `/course/cs4700f12/ns-allinone-2.35/bin/ns ./exp3.tcl $p $q $tcp_start $tcp_end $cbr_start $cbr_end $program_end`;
+
+            # result of NS2 file
+            my $filename = "./exp3_".$p."_".$q."_".$tcp_start.".tr";
+            my %latency_map;
+            my $second_count = 0;
+            my $duration_count = 0;
+
+            # open NS2 result file
+            open(my $fh, '<', $filename) or die "error while opening file $filename";
+
+            # read file line by line
+            while (my $row = <$fh>) {
+
+                my @elems = split ' ', $row;
+                my $event = @elems[0];
+                my $event_time = @elems[1];
+                my $from = @elems[2];
+                my $to = @elems[3];
+                my $pkg_size = @elem[5];
+                my $fid = @elems[7];
+                my $pkt_id = @elems[10];
+                if (flag == 0) {
+                    continue;
+                }
+                if (flag == 0 && $event_time >= $tcp_start) {
+                    $flag = 1;
+                    $second_count = $event_time
+                }
+
+
+                # for throughput
+                if($event eq "r" && $from  == "2" && $to == "3" && $fid == "1" && $flag == 1) {
+                    $total_pkg_size = $total_pkg_size + $pkg_size;
+                }
+
+                # for latency
+                if($event eq 'r' && $to eq "0" && $flag == 1) {
+                    $latency_counter = $latency_counter + 1;
+                    $total_latency = $total_latency + ($event_time - $latency_map{$pkt_id});
+                }
+
+                if($event eq '+' && $from eq "0" && $flag == 1) {
+                    $latency_map{$pkt_id} = $event_time;
+                }
+
+                # for package drop rate
+                if($event eq '+' && $from eq "0" && $flag == 1) {
+                    $total_sent = $total_sent + 1;
+                }
+                if($event eq 'd' && $fid eq "1" && $flag == 1) {
+                    $total_dropped = $total_dropped + 1;
+                }
+                # end of one test
+                if($event_time >= $tcp_end) {
+                    break;
+                }
+
+
+                if ($flag != 0 && $event_time - $second_count >= 0.5) {
+
+
+                    # throughput
+                    my $throughput = ($total_pkg_size * 8) / (($event_time - $second_count) * 1000);
+                    $total_throughput = $total_throughput + $throughput;
+                    # latency
+                    my $latency = $total_latency / $latency_counter;
+                    # package drop rate
+                    my $pdr = 100 * $total_dropped / $total_sent;
+                    print $fh2 $duration_count." ".$total_throughput." ".$latency." ".$pdr."\n";
+
+                    # initialize
+                    $total_pkg_size = 0;
+                    $total_latency = 0;
+                    $latency_counter = 0;
+                    $total_sent = 0;
+                    $total_dropped = 0;
+                    $second_count = $event_time;
+                    $duration_count = $duration_count + 0.5
+                }
+            }
         }
-        
+
+        # clean up
+        `rm *.tr`;
+        last;
+
     }
 }
