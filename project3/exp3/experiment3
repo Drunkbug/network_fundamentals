@@ -114,9 +114,9 @@ foreach my $p (@protocol) {
                     last;
                 }
 
-                if ($flag == 1 && $event_time - $second_count >= 0.5) {
+                if ($flag == 1 && $event_time - $second_count >= 1) {
                     # throughput
-                    my $throughput = ($total_pkg_size * 8) / (($event_time - $second_count) * 1000);
+                    my $throughput = ($total_pkg_size * 8) / (($event_time - $second_count) * 1024 * 1024);
                     $total_throughput = $total_throughput + $throughput;
                     # latency
                     my $latency = $total_latency / $latency_counter;
@@ -131,7 +131,7 @@ foreach my $p (@protocol) {
                     $total_sent = 0;
                     $total_dropped = 0;
                     $second_count = $event_time;
-                    $duration_count = $duration_count + 0.5
+                    $duration_count = $duration_count + 1
                 }
             }
         }
