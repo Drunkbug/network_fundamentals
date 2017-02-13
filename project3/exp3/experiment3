@@ -1,18 +1,18 @@
 #!/bin/perl
-
+use strict;
 my $data_dir = "data";
 if (not -d $data_dir) {
     mkdir $data_dir;
 }
 
-my @protocol = ("Reno", "Sack");
+my @protocol = ("Reno", "SACK");
 my @queuing = ("DropTail", "RED");
-my $experience_count = 5;
-my @tcp_start_time = (5, 10, 15, 20, 25);
-my @tcp_end_time = (105, 110, 115, 120, 125);
-my @program_end_time = (107, 112, 117, 122, 127);
-my @cbr_start_time = (30, 35, 40, 45, 50);
-my @cbr_end_time = (80, 85, 90, 95, 100);
+my $experience_count = 1;
+my @tcp_start_time = (5);#, 10, 15, 20, 25);
+my @tcp_end_time = (105);#, 110, 115, 120, 125);
+my @program_end_time = (107);#, 112, 117, 122, 127);
+my @cbr_start_time = (30);#, 35, 40, 45, 50);
+my @cbr_end_time = (80);#, 85, 90, 95, 100);
 
 foreach my $p (@protocol) {
     foreach my $q (@queuing) {
@@ -33,11 +33,7 @@ foreach my $p (@protocol) {
         for ( $i = 0; $i < $experience_count; $i = $i + 1) {
 
             # result of NS2 file
-            my $filename2 = "./data/exp3_".$p."_".$q.".data";
-            open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
-
-            # data file header
-            print $fh2 "start_time throughput latency pdr\n";
+            my $filename2 = "./data/exp3_".$p."_".$q."_".$tcp_start_time[$i].".data";
 
             my $tcp_start = $tcp_start_time[$i];
             my $tcp_end = $tcp_end_time[$i];
@@ -65,26 +61,30 @@ foreach my $p (@protocol) {
 
             # open NS2 result file
             open(my $fh, '<', $filename) or die "error while opening file $filename";
+            open(my $fh2, '>', $filename2) or die "cannot create file $filename2";
+
+            # data file header
+            print $fh2 "start_time throughput latency pdr\n";
 
             # read file line by line
             while (my $row = <$fh>) {
-
                 my @elems = split ' ', $row;
                 my $event = @elems[0];
                 my $event_time = @elems[1];
                 my $from = @elems[2];
                 my $to = @elems[3];
-                my $pkg_size = @elem[5];
+                my $pkg_size = @elems[5];
                 my $fid = @elems[7];
                 my $pkt_id = @elems[10];
-                if (flag == 0) {
-                    continue;
-                }
-                if (flag == 0 && $event_time >= $tcp_start) {
+
+                if ($flag == 0 && $event_time >= $tcp_start) {
                     $flag = 1;
                     $second_count = $event_time
                 }
 
+                if ($flag == 0) {
+                    next;
+                }
 
                 # for throughput
                 if($event eq "r" && $from  == "2" && $to == "3" && $fid == "1" && $flag == 1) {
@@ -110,13 +110,10 @@ foreach my $p (@protocol) {
                 }
                 # end of one test
                 if($event_time >= $tcp_end) {
-                    break;
+                    last;
                 }
 
-
-                if ($flag != 0 && $event_time - $second_count >= 0.5) {
-
-
+                if ($flag == 1 && $event_time - $second_count >= 0.5) {
                     # throughput
                     my $throughput = ($total_pkg_size * 8) / (($event_time - $second_count) * 1000);
                     $total_throughput = $total_throughput + $throughput;
