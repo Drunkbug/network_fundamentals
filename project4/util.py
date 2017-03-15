@@ -1,6 +1,7 @@
 #!/bin/python
 # imports
 import socket
+from random import randint
 from urlparse import urlparse
 def get_source_ip():
     try:
@@ -25,3 +26,22 @@ def parse_raw_url(raw_url):
     else:
         filename = path.split('/')[-1]
     return host, dest_ip, filename
+
+def checksum(msg):
+    s = 0
+
+    for i in range(0, len(msg), 2):
+        w = ord(msg[i]) + (ord(msg[i+1]) << 8)
+        s += w
+    s = (s >> 16) + (s& 0xffff)
+    s += (s >> 16)
+
+    #complement and mask to 4 byte short
+    s = ~s & 0xffff
+
+    return s
+
+def get_valid_port():
+    port = randint(1024, 65535)
+    #TODO check valid port
+    return port
