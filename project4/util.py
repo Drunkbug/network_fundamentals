@@ -1,16 +1,16 @@
-#!/bin/python
+#!/bin/python3
 # imports
 import socket
 from random import randint
-from urlparse import urlparse
+from urllib.parse import urlparse
 def get_source_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("google.com", 80))
         source_ip = s.getsockname()[0]
         s.close()
-    except socket.error, msg:
-        print 'Error occurs. Err: ' + str(msg[0]) + ' Message ' + msg[1]
+    except (socket.error, msg):
+        print ('Error occurs. Err: ' + str(msg[0]) + ' Message ' + msg[1])
         sys.exit()
     finally:
         s.close()
@@ -45,3 +45,4 @@ def get_valid_port():
     port = randint(1024, 65535)
     #TODO check valid port
     return port
+
