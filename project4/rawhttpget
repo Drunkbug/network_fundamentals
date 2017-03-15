@@ -1,0 +1,28 @@
+#!/bin/python
+# imports
+import socket, sys
+from util import get_source_ip, parse_raw_url
+
+# main function
+def main(raw_url):
+    # create a raw send socket
+    # a send socket must be of type SOCK_RAW/IPPROTO_RAW
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+    except socket.error, msg:
+        print 'Socket could not be created. Error Code: ' + str(msg[0]) + ' Message ' + msg[1]
+        sys.exit()
+
+    # constructing the packet
+    packet = ''
+
+    source_ip = get_source_ip()
+    host, dest_ip, filename = parse_raw_url(raw_url) 
+
+# end of main function
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        sys.exit('Please type valid arguments: ./rawhttpget url')
+    raw_url = sys.argv[1]
+    main(raw_url)
