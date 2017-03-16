@@ -2,11 +2,12 @@
 #imports
 import socket, sys
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
-class TCPSocket(object):
+class TCPPack(object):
     # TCP congestion control
     cwnd = 1
     max_cwnd = 1000
      # set timeout in 60 seconds, if rto set cwnd to 1
+     # TODO maybe longer timeout?
     rto = 60
 
     def __init__(self, src_ = '', src_port_ = '', dst_ = ''):
@@ -77,3 +78,5 @@ class TCPSocket(object):
                      pack('!H', self.tcp_urg_ptr)
 
        return tcp_header +  usrdata
+
+
