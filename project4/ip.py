@@ -28,14 +28,23 @@ class IPSocket(object):
 
     # send and receive data
     # based onISOOSI model, network layer is under transport layer, so we implement socket connection here
-    def send(self, dest_ip_, data_):
+    def send(self, src, dest, dat):
         self.dest_ip = dest_ip_
-        raw_packet = IPv4Packet()
+        raw_packet = IPv4Packet(src, dest, dat)
         packet = raw_packet.pack(data_)
         self.send_socket.sendto(packet, (self.dest_ip, self.src_port))
     # receive datagram
-    def receive(self):
-        print ("")
+    def receive(self, timeout=60):
+        packet = IPv4Packet()
+        # set 60s timeout
+        self.receive_socket.settimeout(timeout)
+        try:
+            while 1:
+                packed = self.receive_socket.receivefrom(65535) 
+                packet.unpack(packed)
+                return packet.data
+        except socket.timeout:
+            return
 
 class IPv4Packet(object):
     def __init__(self, src = '', dest = '', dat = ''):
