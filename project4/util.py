@@ -43,6 +43,5 @@ def checksum(msg):
 
 def get_valid_port():
     port = randint(1024, 65535)
-    #TODO check valid port
     return port
 
