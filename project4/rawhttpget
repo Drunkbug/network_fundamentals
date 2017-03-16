@@ -2,30 +2,18 @@
 # imports
 import socket, sys
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
-'''    def pack_ip_header(self):
-        # ip header fields
-        ip_ihl = 5
-        ip_ver = 4
-        ip_tos = 0
-        ip_tot_len = 20
-        ip_id = randint(0, 65535) 
-        ip_frag_off = 0 # allow fragmentation
-        ip_ttl = 255 # time to live
-        ip_proto = socket.IPROTO_TCP
-        ip_check = 0 # Let checksum be 0 first then calculate later 
-        ip_saddr = socket.inet_aton (self.src_ip)
-        ip_daddr = socket.inet_aton (dest_ip)
-
-        ip_ihl_ver = (ip_ver << 4) + ip_ihl
-'''
+from ip import IPSocket, IPv4Packet
 
 # main function
 def main(raw_url):
     host, dest_ip, filename = parse_raw_url(raw_url) 
+    test = IPv4Packet()
+    ip = IPSocket()
 
 # end of main function
 
 if len(sys.argv) != 2:
     sys.exit('Please type valid arguments: ./rawhttpget url')
+    
 raw_url = sys.argv[1]
 main(raw_url)
