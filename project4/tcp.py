@@ -1,14 +1,42 @@
 #!/bin/python3
 #imports
 import socket, sys
+from random import randint
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
+from ip import IPSocket
+# TCPSocket class
+class TCPSocket:
+    def __init__(self):
+        # socket with ip
+        self.ip_socket = IPSocket()
+        # src and dst ip/port
+        self.src_ip = get_source_ip()
+        self.src_port = randint(1024, 65535)
+        self.des_ip = ''
+        self.des_port = 80
+
+        self.seq_num = 0
+        self.ack = 0
+        self.syn = 0
+        # TCP congestion control
+        cwnd = 1
+        max_cwnd = 1000
+        # set timeout in 60 seconds, if rto set cwnd to 1
+        # TODO maybe longer timeout?
+        rto = 60
+    def send(self):
+        print ("")
+
+    def recv(self):
+        print ("")
+
+    def hand_shake(self):
+        print ("")
+
+
+
+# TCPPack class: handle tcp package pack/unpack
 class TCPPack(object):
-    # TCP congestion control
-    cwnd = 1
-    max_cwnd = 1000
-     # set timeout in 60 seconds, if rto set cwnd to 1
-     # TODO maybe longer timeout?
-    rto = 60
 
     def __init__(self, src_ = '', src_port_ = '', dst_ = ''):
         # set up src and dst ip and port
@@ -33,12 +61,14 @@ class TCPPack(object):
 
         tcp_offset_res = (tcp_doff << 4) + 0
 
-        self.format = '!HHLLBBHHH'
+        self.format = '!HHLLBBH'
         self.psh_format = '!4s4sBBH'
+
+        self.data = ''
 
     def pack(self, usrdata = ''):
         tcp_flags = self.tcp_fin + (self.tcp_syn << 1) + (self.tcp_rst << 2) + (self.tcp_psh <<3) + (self.tcp_ack << 4) + (self.tcp_urg << 5)
-        tcp_header = pack(self.format, \
+        tcp_header = pack(self.format+'BH', \
                         self.src_port, \
                         self.dst_port, \
                         self.tcp_seq, \
@@ -63,10 +93,10 @@ class TCPPack(object):
                     tcp_length)
         psh = psh + tcp_header + user_data
 
-        tcp_check = checksum(psh)
+        tcp_checksum = checksum(psh)
 
         # tcp header with checksum
-        tcp_header = pack('!HHLLBBH', \
+        tcp_header = pack(self.format, \
                         self.src_port, \
                         self.dst_port, \
                         self.tcp_seq, \
@@ -76,7 +106,23 @@ class TCPPack(object):
                         self.tcp_window) + \
                      pack('H', self.tcp_checksum) + \
                      pack('!H', self.tcp_urg_ptr)
+        self.data = usrdata
 
-       return tcp_header +  usrdata
+        return tcp_header + usrdata
+    def unpack(self, data):
+        tcph = unpack(self.format+'HH', data)
+        self.src_port = tcph[0]
+        self.dst_port = tcph[1]
+        self.tcp_seq = tcph[2]
+        self.tcp_ack_seq = tcph[3]
+        tcp_offset_res_ = tcph[4]
+        tcp.flags = tcph [5]
+        self.tcp_window = tcph[6]
+        self.tcp_checksum = tcph[7]
+        self.tcp_urg_ptr = tcph[8]
 
+        self.tcp_offset_res = tcp_offset_res_ >> 4
+        self.data = data[self.tcp_offset_res * 4:]
 
+        #TODO checksum
+        

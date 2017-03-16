@@ -3,7 +3,7 @@ import socket, sys
 from random import randint
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
 class IPSocket(object):
-    def __init__(self, dest_ = ''):
+    def __init__(self, src_ = '', src_port_ = '', dest_ = ''):
         # create a raw send and receive socket
         # a send socket must be of type SOCK_RAW/IPPROTO_RAW
         try:
@@ -20,12 +20,14 @@ class IPSocket(object):
             sys.exit()
 
         self.dest_ip = dest_
+        self.src_ip = src_
+        self.src_port = src_port_
 
-        self.src_ip = get_source_ip()
-        self.src_port = get_valid_port()
+        # self.src_ip = get_source_ip()
+        #self.src_port = get_valid_port()
 
     # send and receive data
-    # based on ISOOSI model, network layer is under transport layer, so we implement socket connection here
+    # based onISOOSI model, network layer is under transport layer, so we implement socket connection here
     def send(self, dest_ip_, data_):
         self.dest_ip = dest_ip_
         raw_packet = IPv4Packet()
@@ -43,7 +45,7 @@ class IPv4Packet(object):
         self.ip_tos = 0
         self.ip_tot_len = 20
         self.ip_id = randint(0, 65535) 
-        # for ip fragmentation
+        # assume MTU are same for the CCIS network
         self.ip_frag_off = 0 
 
         self.ip_ttl = 255 # time to live
