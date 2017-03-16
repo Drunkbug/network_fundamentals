@@ -24,14 +24,14 @@ class TCPSocket:
         # set timeout in 60 seconds, if rto set cwnd to 1
         # TODO maybe longer timeout?
         rto = 60
-    def syn(self):
-        print ("")
+    #def syn(self):
+    #    print ("")
 
-    def ack(self):
-        print ("")
+    #def ack(self):
+    #    print ("")
 
-    def fin(self):
-        print ("")
+    #def fin(self):
+    #    print ("")
 
     def send(self):
         print ("")
@@ -47,6 +47,9 @@ class TCPSocket:
 
     # establish connection
     def hand_shake(self):
+        print ("")
+
+    def reset(self):
         print ("")
 
 
