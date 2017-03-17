@@ -4,15 +4,16 @@ import socket, sys
 from random import randint
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
 from ip import IPSocket
+from struct import *
 # TCPSocket class
 class TCPSocket:
-    def __init__(self, ip_socket_):
+    def __init__(self, raw_url_ = ''):
         # socket with ip
-        self.ip_socket = ip_socket_ 
+        self.ip_socket = IPSocket()
         # src and dst ip/port
         self.src_ip = get_source_ip()
         self.src_port = randint(1024, 65535)
-        self.des_ip = ''
+        self.host, self.des_ip, self.filename = parse_raw_url(raw_url_)
         self.des_port = 80
 
         self.seq_num = 0
@@ -35,11 +36,11 @@ class TCPSocket:
 
     def send(self):
         print ("")
-
+        
     def recv(self):
         print ("")
 
-    def _recv(self):
+    def recv_next(self):
         print ("")
 
     def close(self):
@@ -47,7 +48,22 @@ class TCPSocket:
 
     # establish connection
     def hand_shake(self):
-        print ("")
+        self.src_ip = get_source_ip()
+        self.src_port = randint(1024, 65535)
+        self.seq_num = randint(0, 65535)
+        # initialize
+        tcp_pack = TCPPack()
+        tcp_pack.src_ip = self.src_ip
+        tcp_pack.src_port = self.src_port
+        tcp_pack.dst_ip = self.des_ip
+        tcp_pack.tcp_seq = self.seq_num
+        tcp_pack.ack_seq = self.ack
+
+        tcp_pack.tcp_syn = 1
+
+        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
+
+
 
     def reset(self):
         print ("")
@@ -57,28 +73,28 @@ class TCPSocket:
 # TCPPack class: handle tcp package pack/unpack
 class TCPPack(object):
 
-    def __init__(self, src_ = '', src_port_ = '', dst_ = ''):
+    def __init__(self):
         # set up src and dst ip and port
-        self.src_port = src_port_
-        self.src_id = src_
+        self.src_port = 0
+        self.src_ip = ''
         self.dst_port = 80
-        self.dst_id = dst_
+        self.dst_ip = ''
         
-        tcp_seq = 0
-        tcp_ack_seq = 0
-        tcp_doff = 5
+        self.tcp_seq = 0
+        self.tcp_ack_seq = 0
+        self.tcp_doff = 5
         #tcp flags
-        tcp_fin = 0
-        tcp_syn = 0
-        tcp_rst = 0
-        tcp_psh = 0
-        tcp_ack = 0
-        tcp_urg = 0
-        tcp_window = socket.htons (5840) # for flow control
-        tcp_checksum = 0
-        tcp_urg_ptr = 0
+        self.tcp_fin = 0
+        self.tcp_syn = 0
+        self.tcp_rst = 0
+        self.tcp_psh = 0
+        self.tcp_ack = 0
+        self.tcp_urg = 0
+        self.tcp_window = socket.htons (5840) # for flow control
+        self.tcp_checksum = 0
+        self.tcp_urg_ptr = 0
 
-        tcp_offset_res = (tcp_doff << 4) + 0
+        self.tcp_offset_res = (self.tcp_doff << 4) + 0
 
         self.format = '!HHLLBBH'
         self.psh_format = '!4s4sBBH'
@@ -99,13 +115,13 @@ class TCPPack(object):
                         self.tcp_seq, \
                         self.tcp_ack_seq, \
                         self.tcp_offset_res, \
-                        tcp.flags, \
+                        self.tcp_flags, \
                         self.tcp_window, \
                         self.tcp_checksum, \
                         self.tcp_urg_ptr)
         # pseudo header fields
-        source_addr = socket.inet_aton( self.src_id )
-        dest_addr = socket.inet_aton( self.dst_id )
+        source_addr = socket.inet_aton( self.src_ip )
+        dest_addr = socket.inet_aton( self.dst_ip )
         placeholder = 0
         protocol = socket.IPPROTO_TCP
         tcp_length = len(tcp_header) + len(usrdata)
@@ -116,9 +132,12 @@ class TCPPack(object):
                     placeholder, \
                     protocol, \
                     tcp_length)
-        psh = psh + tcp_header + user_data
+        psh = psh + tcp_header + usrdata.encode()
+        
+        if len(psh) % 2 == 1:
+            psh += "\0".encode()
 
-        tcp_checksum = checksum(psh)
+        self.tcp_checksum = checksum(psh)
 
         # tcp header with checksum
         tcp_header = pack(self.format, \
@@ -127,13 +146,13 @@ class TCPPack(object):
                         self.tcp_seq, \
                         self.tcp_ack_seq, \
                         self.tcp_offset_res, \
-                        tcp.flags, \
+                        self.tcp_flags, \
                         self.tcp_window) + \
                      pack('H', self.tcp_checksum) + \
                      pack('!H', self.tcp_urg_ptr)
         self.data = usrdata
 
-        return tcp_header + usrdata
+        return tcp_header + usrdata.encode()
 
     def unpack(self, data):
         tcph = unpack(self.format+'HH', data)

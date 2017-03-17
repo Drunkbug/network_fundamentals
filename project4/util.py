@@ -1,6 +1,7 @@
 #!/bin/python3
 # imports
 import socket
+import array
 from random import randint
 from urllib.parse import urlparse
 def get_source_ip():
@@ -29,10 +30,7 @@ def parse_raw_url(raw_url):
 
 def checksum(msg):
     s = 0
-
-    for i in range(0, len(msg), 2):
-        w = ord(msg[i]) + (ord(msg[i+1]) << 8)
-        s += w
+    s = sum(array.array("H", msg))
     s = (s >> 16) + (s& 0xffff)
     s += (s >> 16)
 

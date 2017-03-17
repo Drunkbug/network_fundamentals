@@ -9,12 +9,13 @@ from tcp import TCPSocket, TCPPack
 # main function
 def main(raw_url):
     host, dest_ip, filename = parse_raw_url(raw_url) 
-    test = IPv4Packet()
-    ip = IPSocket()
-    tcp = TCPPack()
-    tcpS = TCPSocket(ip)
+    #ip = IPv4Packet()
+    #ipS = IPSocket()
+    #tcp = TCPPack()
+    tcpS = TCPSocket(raw_url)
+    tcpS.hand_shake()
 
-# end of main function
+
 
 if len(sys.argv) != 2:
     sys.exit('Please type valid arguments: ./rawhttpget url')

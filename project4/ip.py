@@ -1,9 +1,10 @@
 #!/bin/python3
 import socket, sys
+from struct import *
 from random import randint
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
 class IPSocket(object):
-    def __init__(self, src_ = '', src_port_ = '', dest_ = ''):
+    def __init__(self):
         # create a raw send and receive socket
         # a send socket must be of type SOCK_RAW/IPPROTO_RAW
         try:
@@ -19,19 +20,21 @@ class IPSocket(object):
             raise se
             sys.exit()
 
-        self.dest_ip = dest_
-        self.src_ip = src_
-        self.src_port = src_port_
+        self.dest_ip = ''
+        self.src_ip = ''
+        self.src_port = 0
 
         # self.src_ip = get_source_ip()
         #self.src_port = get_valid_port()
 
     # send and receive data
     # based onISOOSI model, network layer is under transport layer, so we implement socket connection here
-    def send(self, src, dest, dat):
-        self.dest_ip = dest_ip_
+    def send(self, src, dest, src_p, dat):
+        self.src_ip = src
+        self.dest_ip = dest
+        self.src_port = src_p
         raw_packet = IPv4Packet(src, dest, dat)
-        packet = raw_packet.pack(data_)
+        packet = raw_packet.pack(dat)
         self.send_socket.sendto(packet, (self.dest_ip, self.src_port))
     # receive datagram
     def receive(self, timeout=60):
