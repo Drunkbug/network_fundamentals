@@ -12,6 +12,7 @@ def main(raw_url):
     #ip = IPv4Packet()
     #ipS = IPSocket()
     #tcp = TCPPack()
+    print (dest_ip)
     tcpS = TCPSocket(raw_url)
     tcpS.hand_shake()
 

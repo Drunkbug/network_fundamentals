@@ -5,6 +5,7 @@ from random import randint
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
 from ip import IPSocket
 from struct import *
+import time
 # TCPSocket class
 class TCPSocket:
     def __init__(self, raw_url_ = ''):
@@ -49,21 +50,50 @@ class TCPSocket:
     # establish connection
     def hand_shake(self):
         self.src_ip = get_source_ip()
+        print (self.src_ip)
         self.src_port = randint(1024, 65535)
         self.seq_num = randint(0, 65535)
         # initialize
+        tcp_pack = self.initialize_tcp_pack()
+
+        # set syn flag in tcp
+        tcp_pack.tcp_syn = 1
+        # send first syn
+        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
+        # receive
+        recv_pkt = None
+        while 1:
+            recv_pkt = self.ip_socket.receive()
+            if (recv_pkt):
+                tcp_pack.unpack()
+                tcp_pack.src_ip = self.des_ip
+                tcp_pack.dst_ip = self.src_ip
+                break
+        if tcp_pack.tcp_ack == 1 and \
+            tcp_pack.tcp_syn == 1 and \
+            tcp_pack.ack_seq == (self.seq_num + 1):
+            self.ack = tcp_pack.ack_seq + 1
+            self.seq_num = tcp_pack.ack_seq
+        else:
+            print ("error")
+            #TODO
+            return 
+        # send ack
+        tcp_pack = self.initialize_tcp_pack()
+        tcp_pack.tcp_ack = 1
+        # send packet
+        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
+
+        
+
+    def initialize_tcp_pack(self):
         tcp_pack = TCPPack()
         tcp_pack.src_ip = self.src_ip
         tcp_pack.src_port = self.src_port
         tcp_pack.dst_ip = self.des_ip
         tcp_pack.tcp_seq = self.seq_num
         tcp_pack.ack_seq = self.ack
-
-        tcp_pack.tcp_syn = 1
-
-        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
-
-
+        return tcp_pack
 
     def reset(self):
         print ("")

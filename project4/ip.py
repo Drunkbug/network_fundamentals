@@ -23,6 +23,7 @@ class IPSocket(object):
         self.dest_ip = ''
         self.src_ip = ''
         self.src_port = 0
+        self.rto = 60
 
         # self.src_ip = get_source_ip()
         #self.src_port = get_valid_port()
@@ -43,7 +44,7 @@ class IPSocket(object):
         self.receive_socket.settimeout(timeout)
         try:
             while 1:
-                packed = self.receive_socket.receivefrom(65535) 
+                packed = self.receive_socket.recv(65535) 
                 packet.unpack(packed)
                 return packet.data
         except socket.timeout:
