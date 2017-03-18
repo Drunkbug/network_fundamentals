@@ -6,19 +6,15 @@ from util import get_source_ip, parse_raw_url, checksum, get_valid_port
 class IPSocket(object):
     def __init__(self):
         # create a raw send and receive socket
-        # a send socket must be of type SOCK_RAW/IPPROTO_RAW
         try:
             self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
         except socket.error as se:
             raise se
-            sys.exit()
 
-        # a receive socket must be of type SOCK_STREAM/IPPROTO_IP
         try:
-            self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_IP)
+            self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
         except socket.error as se:
             raise se
-            sys.exit()
 
         self.dest_ip = ''
         self.src_ip = ''
@@ -26,7 +22,7 @@ class IPSocket(object):
         self.rto = 60
 
         # self.src_ip = get_source_ip()
-        #self.src_port = get_valid_port()
+        # self.src_port = get_valid_port()
 
     # send and receive data
     # based onISOOSI model, network layer is under transport layer, so we implement socket connection here
@@ -72,7 +68,6 @@ class IPv4Packet(object):
         self.ip_ihl_ver = (self.ip_ver << 4) + self.ip_ihl
         self.data = dat
 
-
     # packet the header
     def pack(self, data):
         ip_saddr = socket.inet_aton (self.src_ip)
@@ -106,8 +101,21 @@ class IPv4Packet(object):
 
     # unpack and validate received data
     def unpack(self, data):
-        ip_fields = struct.unpack(self.format, data[:20]) 
-        ip_ihl = ip_fields[0] - (self.ip_ver << 4)
+        iph = unpack(self.format, data[0:20]) 
+        version_ihl = iph[0]
+        self.ip_ver = version_ihl >> 4
+        self.ip_ihl = version_ihl & 0xF 
+        self.tos = iph[1]
+        self.ip_tot_len = iph[2]
+        self.ip_id = iph[3]
+        self.ip_frag_off = iph[4]
+        self.ip_ttl = iph[5]
+        self.ip_proto = iph[6]
+        self.ip_checksum = iph[7]
+        self.ip_saddr = socket.inet_ntoa(iph[8])
+        self.ip_daddr = socket.inet_ntoa(iph[9])
+        self.data = data[self.ip_ihl*4:self.ip_tot_len]
 
+        # TODO checksum validation
 
 

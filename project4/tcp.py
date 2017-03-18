@@ -65,7 +65,7 @@ class TCPSocket:
         while 1:
             recv_pkt = self.ip_socket.receive()
             if (recv_pkt):
-                tcp_pack.unpack()
+                tcp_pack.unpack(recv_pkt)
                 tcp_pack.src_ip = self.des_ip
                 tcp_pack.dst_ip = self.src_ip
                 break
@@ -185,13 +185,14 @@ class TCPPack(object):
         return tcp_header + usrdata.encode()
 
     def unpack(self, data):
-        tcph = unpack(self.format+'HH', data)
+        print (data)
+        tcph = unpack(self.format+'HH', data[0:20])
         self.src_port = tcph[0]
         self.dst_port = tcph[1]
         self.tcp_seq = tcph[2]
         self.tcp_ack_seq = tcph[3]
         tcp_offset_res_ = tcph[4]
-        self.tcp.flags = tcph [5]
+        self.tcp_flags = tcph [5]
         self.tcp_window = tcph[6]
         self.tcp_checksum = tcph[7]
         self.tcp_urg_ptr = tcph[8]
@@ -201,12 +202,12 @@ class TCPPack(object):
         self.data = data[data_offset:]
 
         # fetch flags
-        self.tcp_fin = (self.flags & 1) 
-        self.tcp_syn = (self.flags & 2) >> 1 
-        self.tcp_rst = (self.flags & 4) >> 2
-        self.tcp_psh = (self.flags & 8) >> 3 
-        self.tcp_ack = (self.flags & 16) >> 4
-        self.tcp_urg = (self.flags & 32) >> 5 
+        self.tcp_fin = (self.tcp_flags & 1) 
+        self.tcp_syn = (self.tcp_flags & 2) >> 1 
+        self.tcp_rst = (self.tcp_flags & 4) >> 2
+        self.tcp_psh = (self.tcp_flags & 8) >> 3 
+        self.tcp_ack = (self.tcp_flags & 16) >> 4
+        self.tcp_urg = (self.tcp_flags & 32) >> 5 
 
         #TODO checksum
         
