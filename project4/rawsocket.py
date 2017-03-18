@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/bin/python
 # imports
 import socket, sys 
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port

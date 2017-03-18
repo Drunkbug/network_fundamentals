@@ -4,6 +4,7 @@ import socket
 import array
 from random import randint
 from urllib.parse import urlparse
+#from urlparse import urlparse
 def get_source_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -29,6 +30,8 @@ def parse_raw_url(raw_url):
     return host, dest_ip, filename
 
 def checksum(msg):
+    if len(msg) % 2 == 1:
+        msg += "\0".encode()
     s = 0
     s = sum(array.array("H", msg))
     s = (s >> 16) + (s& 0xffff)

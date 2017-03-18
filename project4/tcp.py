@@ -77,7 +77,7 @@ class TCPSocket:
         else:
             print ("error")
             #TODO
-            return 
+            #return 
         # send ack
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
@@ -164,8 +164,6 @@ class TCPPack(object):
                     tcp_length)
         psh = psh + tcp_header + usrdata.encode()
         
-        if len(psh) % 2 == 1:
-            psh += "\0".encode()
 
         self.tcp_checksum = checksum(psh)
 
