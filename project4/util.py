@@ -31,14 +31,14 @@ def parse_raw_url(raw_url):
 
 def checksum(msg):
     if len(msg) % 2 == 1:
-        msg += "\0".encode()
+        msg += '\0'.encode()
     s = 0
     s = sum(array.array("H", msg))
-    s = (s >> 16) + (s& 0xffff)
+    s = (s >> 16) + (s & 0xffff)
     s += (s >> 16)
 
     #complement and mask to 4 byte short
-    s = ~s & 0xffff
+    s = (~s) & 0xffff
 
     return s
 

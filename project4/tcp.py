@@ -71,16 +71,18 @@ class TCPSocket:
                 break
         if tcp_pack.tcp_ack == 1 and \
             tcp_pack.tcp_syn == 1 and \
-            tcp_pack.ack_seq == (self.seq_num + 1):
-            self.ack = tcp_pack.ack_seq + 1
-            self.seq_num = tcp_pack.ack_seq
+            tcp_pack.tcp_ack_seq == (self.seq_num + 1):
+            self.ack = tcp_pack.tcp_ack_seq + 1
+            self.seq_num = tcp_pack.tcp_ack_seq
         else:
             print ("error")
+            sys.exit()
             #TODO
             #return 
         # send ack
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
+        print (tcp_pack.tcp_ack)
         # send packet
         self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
 
@@ -139,7 +141,8 @@ class TCPPack(object):
                     (self.tcp_psh <<3) + \
                     (self.tcp_ack << 4) + \
                     (self.tcp_urg << 5)
-        tcp_header = pack(self.format+'BH', \
+
+        tcp_header = pack(self.format+'HH', \
                         self.src_port, \
                         self.dst_port, \
                         self.tcp_seq, \
