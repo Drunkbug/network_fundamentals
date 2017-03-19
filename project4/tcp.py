@@ -92,21 +92,29 @@ class TCPSocket:
         tcp_pack = self.initialize_tcp_pack()
         while 1:
             if time.time() - cur_time >= self.rto:
-                print ("Time out, change cwnd to 1")
-                self.cwnd = 1
+                print ("Handshake timeout")
+                sys.exit(0)
             recv_pkt = self.ip_socket.receive()
             if (recv_pkt):
                 tcp_pack.unpack(recv_pkt)
                 tcp_pack.src_ip = self.des_ip
                 tcp_pack.dst_ip = self.src_ip
-                break
-        if tcp_pack.tcp_ack == 1 and \
-            tcp_pack.tcp_syn == 1 and \
-            tcp_pack.tcp_ack_seq == (self.seq_num + 1):
-            self.seq_num = tcp_pack.tcp_ack_seq
-            self.ack = tcp_pack.tcp_seq + 1
-        else:
-            print ("seq/ack not match")
+                valid_flag = (tcp_pack.tcp_ack == 1 and \
+                            tcp_pack.tcp_syn == 1)
+                valid_seq = (tcp_pack.tcp_ack_seq == (self.seq_num + 1))
+                valid_port = (tcp_pack.src_port == self.des_port and \
+                            tcp_pack.src_ip == self.des_ip and \
+                            tcp_pack.dst_port == self.src_port and \
+                            tcp_pack.dst_ip == self.src_ip)
+                if valid_flag and valid_seq and valid_port: 
+                    self.seq_num = tcp_pack.tcp_ack_seq
+                    self.ack = tcp_pack.tcp_seq + 1
+                    break
+                else:
+                    print ("Wrong Pakcet")
+            else:
+                print("Handshake time out")
+                sys.exit(0)
         # send ack
         tcp_pack.tcp_ack = 1
         # send packet
