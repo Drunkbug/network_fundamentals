@@ -21,19 +21,11 @@ class TCPSocket:
         self.ack = 0
         self.syn = 0
         # TCP congestion control
-        cwnd = 1
-        max_cwnd = 1000
+        self.cwnd = 1
+        self.max_cwnd = 1000
         # set timeout in 60 seconds, if rto set cwnd to 1
         # TODO maybe longer timeout?
-        rto = 60
-    #def syn(self):
-    #    print ("")
-
-    #def ack(self):
-    #    print ("")
-
-    #def fin(self):
-    #    print ("")
+        self.rto = 60
 
     def send(self):
         print ("")
@@ -50,7 +42,6 @@ class TCPSocket:
     # establish connection
     def hand_shake(self):
         self.src_ip = get_source_ip()
-        print (self.src_ip)
         self.src_port = randint(1024, 65535)
         self.seq_num = randint(0, 65535)
         # initialize
@@ -62,7 +53,11 @@ class TCPSocket:
         self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
         # receive
         recv_pkt = None
+        cur_time = time.time()
         while 1:
+            if time.time() - cur_time >= self.rto:
+                print ("Time out, change cwnd to 1")
+                self.cwnd = 1
             recv_pkt = self.ip_socket.receive()
             if (recv_pkt):
                 tcp_pack.unpack(recv_pkt)
@@ -75,14 +70,10 @@ class TCPSocket:
             self.ack = tcp_pack.tcp_ack_seq + 1
             self.seq_num = tcp_pack.tcp_ack_seq
         else:
-            print ("error")
-            sys.exit()
-            #TODO
-            #return 
+            print ("seq/ack not match")
         # send ack
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
-        print (tcp_pack.tcp_ack)
         # send packet
         self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
 
@@ -186,7 +177,6 @@ class TCPPack(object):
         return tcp_header + usrdata.encode()
 
     def unpack(self, data):
-        print (data)
         tcph = unpack(self.format+'HH', data[0:20])
         self.src_port = tcph[0]
         self.dst_port = tcph[1]
@@ -210,6 +200,10 @@ class TCPPack(object):
         self.tcp_ack = (self.tcp_flags & 16) >> 4
         self.tcp_urg = (self.tcp_flags & 32) >> 5 
 
-        #TODO checksum
+        # TODO checksum
+        data_check = data[0:16] + pack('H', 0) + data[18:]
+        check_valid = checksum(data_check)
+        #if check_valid != self.tcp_checksum:
+        #    print ("broken TCP packet")
         
         

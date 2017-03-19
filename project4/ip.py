@@ -105,6 +105,7 @@ class IPv4Packet(object):
     def unpack(self, data):
         iph = unpack(self.format, data[0:20]) 
         version_ihl = iph[0]
+        self.ip_ihl_ver = version_ihl
         self.ip_ver = version_ihl >> 4
         self.ip_ihl = version_ihl & 0xF 
         self.tos = iph[1]
@@ -118,6 +119,12 @@ class IPv4Packet(object):
         self.ip_daddr = socket.inet_ntoa(iph[9])
         self.data = data[self.ip_ihl*4:self.ip_tot_len]
 
-        # TODO checksum validation
+        # checksum validation
+        checksum_holder = 0
+        data_check = data[:10] + pack('H', 0) + data[12:]
+        check_valid = checksum(data_check)
+        # TODO valid checksum
+        #if check_valid != self.ip_checksum:
+        #    print("broken packet")
 
 
