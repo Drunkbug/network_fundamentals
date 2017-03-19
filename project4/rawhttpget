@@ -2,11 +2,13 @@
 # imports
 import socket, sys
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
-from rawsocket import main
+from rawsocket import RawSocket
 
 
 if len(sys.argv) != 2:
     sys.exit('Please type valid arguments: ./rawhttpget url')
     
 raw_url = sys.argv[1]
-main(raw_url)
+rawsocket = RawSocket()
+rawsocket.raw_url = raw_url
+rawsocket.main()

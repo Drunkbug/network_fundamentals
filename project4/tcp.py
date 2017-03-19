@@ -14,7 +14,7 @@ class TCPSocket:
         # src and dst ip/port
         self.src_ip = get_source_ip()
         self.src_port = randint(1024, 65535)
-        self.host, self.des_ip, self.filename = parse_raw_url(raw_url_)
+        self.host, self.des_ip, self.filename, self.path = parse_raw_url(raw_url_)
         self.des_port = 80
 
         self.seq_num = 0
@@ -27,11 +27,45 @@ class TCPSocket:
         # TODO maybe longer timeout?
         self.rto = 60
 
-    def send(self):
-        print ("")
+    def send(self, data):
+        # initialize
+        tcp_pack = self.initialize_tcp_pack()
+        tcp_pack.tcp_ack = 1
+        tcp_pack.tcp_psh = 1
+        tcp_pack.data = data
+        # wrap ip header and send request
+        self.send()
+
+        # receive packet
+        tcp_pack = self.recv()
+
+        #if tcp_pack:
+        #    print ("Timeout")
+        if tcp_pack.tcp_ack_seq == self.seq_num + len(data):
+            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
+            self.seq_num = tcp_pack.tcp_ack_seq
+        else 
+            print ("Incorrect SYN/ACK sequence")
+            # TODO
         
+    def send(self):
+        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
+
     def recv(self):
-        print ("")
+        tcp_pack = self.initialize_tcp_pack()
+        cur_time = time.time()
+        recv_pkt = None
+        while 1:
+            if time.time() - cur_time >= self.rto:
+                print ("Time out, change cwnd to 1")
+                self.cwnd = 1
+            recv_pkt = self.ip_socket.receive()
+            if (recv_pkt):
+                tcp_pack.unpack(recv_pkt)
+                tcp_pack.src_ip = self.des_ip
+                tcp_pack.dst_ip = self.src_ip
+                return tcp_pack
+        return
 
     def recv_next(self):
         print ("")
@@ -50,7 +84,8 @@ class TCPSocket:
         # set syn flag in tcp
         tcp_pack.tcp_syn = 1
         # send first syn
-        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
+        self.send()
+        #self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
         # receive
         recv_pkt = None
         cur_time = time.time()
