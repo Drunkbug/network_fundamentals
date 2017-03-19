@@ -33,7 +33,7 @@ class RawSocket(object):
         # establish connection 
         sock.hand_shake()
         # send get request
-        sock.send(self.http_get())
+        # sock.send_request(self.http_get())
 
         #self.receive()
 

@@ -41,7 +41,6 @@ class IPSocket(object):
         try:
             while 1:
                 packed = self.receive_socket.recv(65535) 
-                print (packed)
                 packet.unpack(packed)
                 return packet.data
         except socket.timeout:

@@ -27,14 +27,14 @@ class TCPSocket:
         # TODO maybe longer timeout?
         self.rto = 60
 
-    def send(self, data):
+    def send_request(self, data):
         # initialize
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
         tcp_pack.tcp_psh = 1
         tcp_pack.data = data
         # wrap ip header and send request
-        self.send()
+        self.send(tcp_pack)
 
         # receive packet
         tcp_pack = self.recv()
@@ -44,11 +44,11 @@ class TCPSocket:
         if tcp_pack.tcp_ack_seq == self.seq_num + len(data):
             self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
             self.seq_num = tcp_pack.tcp_ack_seq
-        else 
+        else :
             print ("Incorrect SYN/ACK sequence")
             # TODO
         
-    def send(self):
+    def send(self, tcp_pack):
         self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
 
     def recv(self):
@@ -84,11 +84,12 @@ class TCPSocket:
         # set syn flag in tcp
         tcp_pack.tcp_syn = 1
         # send first syn
-        self.send()
+        self.send(tcp_pack)
         #self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
         # receive
         recv_pkt = None
         cur_time = time.time()
+        tcp_pack = self.initialize_tcp_pack()
         while 1:
             if time.time() - cur_time >= self.rto:
                 print ("Time out, change cwnd to 1")
@@ -102,12 +103,11 @@ class TCPSocket:
         if tcp_pack.tcp_ack == 1 and \
             tcp_pack.tcp_syn == 1 and \
             tcp_pack.tcp_ack_seq == (self.seq_num + 1):
-            self.ack = tcp_pack.tcp_ack_seq + 1
             self.seq_num = tcp_pack.tcp_ack_seq
+            self.ack = tcp_pack.tcp_seq + 1
         else:
             print ("seq/ack not match")
         # send ack
-        tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
         # send packet
         self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
