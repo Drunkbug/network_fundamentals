@@ -29,6 +29,7 @@ class TCPSocket:
 
     def send_request(self, data):
         # initialize
+        print (data)
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
         tcp_pack.tcp_psh = 1
@@ -49,7 +50,7 @@ class TCPSocket:
             # TODO
         
     def send(self, tcp_pack):
-        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack()) 
+        self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack(tcp_pack.data)) 
 
     def recv(self):
         tcp_pack = self.initialize_tcp_pack()
@@ -130,8 +131,6 @@ class TCPSocket:
         tcp_pack.dst_ip = self.des_ip
         tcp_pack.tcp_seq = self.seq_num
         tcp_pack.tcp_ack_seq = self.ack
-        print(self.seq_num)
-        print(self.ack)
         return tcp_pack
 
     def reset(self):

@@ -3,6 +3,7 @@ import socket, sys
 from struct import *
 from random import randint
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
+
 class IPSocket(object):
     def __init__(self):
         # create a raw send and receive socket
@@ -27,6 +28,8 @@ class IPSocket(object):
     # send and receive data
     # based onISOOSI model, network layer is under transport layer, so we implement socket connection here
     def send(self, src, dest, src_p, dat):
+        # test ==============delete=========
+        # test ==============delete=========
         self.src_ip = src
         self.dest_ip = dest
         self.src_port = src_p

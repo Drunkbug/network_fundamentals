@@ -13,9 +13,9 @@ class RawSocket(object):
         self.filename = ''
 
     def http_get(self):
-        request = "GET {self.path} HTTP/1.0\r\n" \
-                "Host: {self.host}\r\n" \
-                "Accept: text/html,application/xhtml+xml, */*\r\n" \
+        request = "GET " + self.path + " HTTP/1.1\r\n" \
+                "Host: " + self.host + "\r\n" \
+                "Accept: text/html\r\n" \
                 "Connection: keep-alive\r\n\r\n"
         return request
     
@@ -33,7 +33,7 @@ class RawSocket(object):
         # establish connection 
         sock.hand_shake()
         # send get request
-        # sock.send_request(self.http_get())
+        sock.send_request(self.http_get())
 
         #self.receive()
 

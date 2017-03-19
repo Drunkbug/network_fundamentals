@@ -23,11 +23,10 @@ def parse_raw_url(raw_url):
     host = url.netloc
     dest_ip = socket.gethostbyname(host)
     path = url.path
-    if not path:
+    filename = path.split('/')[-1]
+    if not filename:
         filename = 'index.html'
-    else:
-        filename = path.split('/')[-1]
-    return host, dest_ip, filename, path
+    return host, dest_ip, filename, path + filename
 
 def checksum(msg):
     if len(msg) % 2 == 1:
@@ -45,4 +44,5 @@ def checksum(msg):
 def get_valid_port():
     port = randint(1024, 65535)
     return port
+
 
