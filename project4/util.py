@@ -46,4 +46,12 @@ def get_valid_port():
     port = randint(1024, 65535)
     return port
 
+def convert_bytes_to_str(data, l):
+    return get_hex_string_from_int(int.from_bytes(data, byteorder='big'), l)
 
+def get_hex_string_from_int(i, length):
+    if length == 0:
+        return ""
+    result = hex(i)[2:]
+    result = "0" * (length - len(result)) + result
+    return result

@@ -1,10 +1,11 @@
 #!/bin/python
 # imports
 import socket, sys 
-from util import get_source_ip, parse_raw_url, checksum, get_valid_port
+from util import * 
 from ip import IPSocket, IPv4Packet
 from tcp import TCPSocket, TCPPack
 import time
+import binascii
 
 class RawSocket(object):
     def __init__(self, raw_url_ = ''):
@@ -17,7 +18,7 @@ class RawSocket(object):
         self.sock = None
 
     def http_get(self):
-        request = "GET " + self.path + " HTTP/1.1\r\n" \
+        request = "GET " + self.raw_url + " HTTP/1.1\r\n" \
                 "Host: " + self.host + "\r\n" \
                 "Accept: text/html\r\n" \
                 "Connection: keep-alive\r\n\r\n"
@@ -44,13 +45,11 @@ class RawSocket(object):
     def receive(self):
         start_time = time.time()
         #while time.time() - start_time <= self.ack_timeout:
-        flag = 2
+        flag = 4
         while flag:
-            self.data += self.sock.recv_data().decode()
-            print (self.data)
+            data = self.sock.recv_data()
+            self.data += convert_bytes_to_str(data, len(data))
             flag -= 1
+        print ("======================================")
+        print (binascii.unhexlify(self.data).decode('utf8'))
             
-
-
-
-

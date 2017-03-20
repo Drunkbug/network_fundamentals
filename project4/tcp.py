@@ -30,10 +30,12 @@ class TCPSocket:
         # TODO maybe longer timeout?
         self.rto = 60
 
-        self.get_data= ''
+        self.prev_data= ''
         
     def send_request(self, data):
+        self.prev_data = data
         # initialize
+        print ("data:")
         print (data)
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
@@ -68,22 +70,25 @@ class TCPSocket:
     def recv_data(self):
         # receive packet
         tcp_pack = self.recv()
+        # timeout
+        if not tcp_pack:
+            return
 
-        #if tcp_pack:
-        #    print ("Timeout")
-        print (str(self.seq_num) + "==" + str(tcp_pack.tcp_ack_seq))
-        print (tcp_pack.data)
-        print (tcp_pack.data.encode())
-        if tcp_pack.tcp_ack_seq == self.seq_num + len(tcp_pack.data):
-            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
+        print (str(tcp_pack.tcp_ack_seq) + "==" + str(self.seq_num) + "+" + str(len(self.prev_data)))
+        if tcp_pack.tcp_ack_seq == self.seq_num + len(self.prev_data):
             self.seq_num = tcp_pack.tcp_ack_seq
-            self.get_data = tcp_pack.data
+            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
+            #print (tcp_pack.data)
+            print (len(tcp_pack.data))
         else :
             print ("Incorrect SYN/ACK sequence")
+        returned_data = tcp_pack.data
+        # initialize
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
+        self.prev_data = tcp_pack.data
         self.send(tcp_pack)
-        return self.get_data 
+        return returned_data 
 
 
     def fin(self):
@@ -247,7 +252,7 @@ class TCPPack(object):
         self.tcp_urg_ptr = tcph[8]
 
         self.tcp_offset_res = tcp_offset_res_ >> 4
-        self.data = data[self.tcp_offset_res:]
+        self.data = data[self.tcp_offset_res * 4:]
 
         # fetch flags
         self.tcp_fin = (self.tcp_flags & 1) 
