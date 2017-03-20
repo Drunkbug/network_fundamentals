@@ -17,9 +17,12 @@ class TCPSocket:
         self.host, self.des_ip, self.filename, self.path = parse_raw_url(raw_url_)
         self.des_port = 80
 
+        # seq number and ack number for handle out of order packets
         self.seq_num = 0
         self.ack = 0
-        self.syn = 0
+        self.seq_acc = 0
+        self.ack_acc = 0
+        #self.syn = 0
         # TCP congestion control
         self.cwnd = 1
         self.max_cwnd = 1000
@@ -27,6 +30,8 @@ class TCPSocket:
         # TODO maybe longer timeout?
         self.rto = 60
 
+        self.get_data= ''
+        
     def send_request(self, data):
         # initialize
         print (data)
@@ -36,42 +41,52 @@ class TCPSocket:
         tcp_pack.data = data
         # wrap ip header and send request
         self.send(tcp_pack)
+        self.recv_data()
 
-        # receive packet
-        tcp_pack = self.recv()
-
-        #if tcp_pack:
-        #    print ("Timeout")
-        if tcp_pack.tcp_ack_seq == self.seq_num + len(data):
-            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
-            self.seq_num = tcp_pack.tcp_ack_seq
-        else :
-            print ("Incorrect SYN/ACK sequence")
-            # TODO
         
     def send(self, tcp_pack):
         self.ip_socket.send(self.src_ip, self.des_ip, self.src_port, tcp_pack.pack(tcp_pack.data)) 
 
+    # receive function for three way handshake
     def recv(self):
         tcp_pack = self.initialize_tcp_pack()
-        cur_time = time.time()
+        start_time = time.time()
         recv_pkt = None
         while 1:
-            if time.time() - cur_time >= self.rto:
+            if time.time() - start_time >= self.rto:
                 print ("Time out, change cwnd to 1")
                 self.cwnd = 1
+                return 
             recv_pkt = self.ip_socket.receive()
             if (recv_pkt):
                 tcp_pack.unpack(recv_pkt)
                 tcp_pack.src_ip = self.des_ip
                 tcp_pack.dst_ip = self.src_ip
                 return tcp_pack
-        return
 
-    def recv_next(self):
-        print ("")
+    # receive data from sender 
+    def recv_data(self):
+        # receive packet
+        tcp_pack = self.recv()
 
-    def close(self):
+        #if tcp_pack:
+        #    print ("Timeout")
+        print (str(self.seq_num) + "==" + str(tcp_pack.tcp_ack_seq))
+        print (tcp_pack.data)
+        print (tcp_pack.data.encode())
+        if tcp_pack.tcp_ack_seq == self.seq_num + len(tcp_pack.data):
+            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
+            self.seq_num = tcp_pack.tcp_ack_seq
+            self.get_data = tcp_pack.data
+        else :
+            print ("Incorrect SYN/ACK sequence")
+        tcp_pack = self.initialize_tcp_pack()
+        tcp_pack.tcp_ack = 1
+        self.send(tcp_pack)
+        return self.get_data 
+
+
+    def fin(self):
         print ("")
 
     # establish connection
@@ -133,8 +148,6 @@ class TCPSocket:
         tcp_pack.tcp_ack_seq = self.ack
         return tcp_pack
 
-    def reset(self):
-        print ("")
 
 
 
@@ -234,8 +247,7 @@ class TCPPack(object):
         self.tcp_urg_ptr = tcph[8]
 
         self.tcp_offset_res = tcp_offset_res_ >> 4
-        data_offset = len(data) - self.tcp_offset_res
-        self.data = data[data_offset:]
+        self.data = data[self.tcp_offset_res:]
 
         # fetch flags
         self.tcp_fin = (self.tcp_flags & 1) 

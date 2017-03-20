@@ -119,7 +119,7 @@ class IPv4Packet(object):
         self.ip_checksum = iph[7]
         self.ip_saddr = socket.inet_ntoa(iph[8])
         self.ip_daddr = socket.inet_ntoa(iph[9])
-        self.data = data[self.ip_ihl*4:self.ip_tot_len]
+        self.data = data[self.ip_ihl*4:]
 
         # checksum validation
         checksum_holder = 0

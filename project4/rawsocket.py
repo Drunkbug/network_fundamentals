@@ -4,6 +4,7 @@ import socket, sys
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
 from ip import IPSocket, IPv4Packet
 from tcp import TCPSocket, TCPPack
+import time
 
 class RawSocket(object):
     def __init__(self, raw_url_ = ''):
@@ -11,6 +12,9 @@ class RawSocket(object):
         self.host = ''
         self.dest_ip = ''
         self.filename = ''
+        self.ack_timeout = 60
+        self.data = ''
+        self.sock = None
 
     def http_get(self):
         request = "GET " + self.path + " HTTP/1.1\r\n" \
@@ -29,16 +33,23 @@ class RawSocket(object):
         self.path = parse_raw_url(self.raw_url)
         print (self.dest_ip)
         # establish TCP socket
-        sock = TCPSocket(self.raw_url)
+        self.sock = TCPSocket(self.raw_url)
         # establish connection 
-        sock.hand_shake()
+        self.sock.hand_shake()
         # send get request
-        sock.send_request(self.http_get())
+        self.sock.send_request(self.http_get())
 
-        #self.receive()
+        self.receive()
 
     def receive(self):
-        print ("")
+        start_time = time.time()
+        #while time.time() - start_time <= self.ack_timeout:
+        flag = 2
+        while flag:
+            self.data += self.sock.recv_data().decode()
+            print (self.data)
+            flag -= 1
+            
 
 
 

@@ -26,7 +26,8 @@ def parse_raw_url(raw_url):
     filename = path.split('/')[-1]
     if not filename:
         filename = 'index.html'
-    return host, dest_ip, filename, path + filename
+        path += filename
+    return host, dest_ip, filename, path
 
 def checksum(msg):
     if len(msg) % 2 == 1:
