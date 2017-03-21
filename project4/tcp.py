@@ -74,7 +74,7 @@ class TCPSocket:
         if not tcp_pack:
             return
 
-        print (str(tcp_pack.tcp_ack_seq) + "==" + str(self.seq_num) + "+" + str(len(self.prev_data)))
+        #print (str(tcp_pack.tcp_ack_seq) + "==" + str(self.seq_num) + "+" + str(len(self.prev_data)))
         if tcp_pack.tcp_ack_seq == self.seq_num + len(self.prev_data):
             self.seq_num = tcp_pack.tcp_ack_seq
             self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
@@ -82,6 +82,8 @@ class TCPSocket:
             print (len(tcp_pack.data))
         else :
             print ("Incorrect SYN/ACK sequence")
+            return 
+            #sys.exit(0)
         returned_data = tcp_pack.data
         # initialize
         tcp_pack = self.initialize_tcp_pack()
