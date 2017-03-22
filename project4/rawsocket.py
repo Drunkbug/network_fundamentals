@@ -45,11 +45,18 @@ class RawSocket(object):
     def receive(self):
         start_time = time.time()
         #while time.time() - start_time <= self.ack_timeout:
-        flag = 20
-        while time.time() - start_time<=20:
+        flag = 4
+        while time.time() - start_time<=15:
             data = self.sock.recv_data()
             if data:
-                self.data += convert_bytes_to_str(data, len(data))
+                if data.find('\r\n\r\n') >= 0:
+                    header = data[0:data.find('\r\n\r\n'):]
+                    content = data[len(header):]
+                    self.data += content
+                else:
+                    self.data += data
+                
+
             flag -= 1
         print ("======================================")
         #print (binascii.unhexlify(self.data).decode('utf8'))

@@ -3,7 +3,7 @@
 import socket
 import array
 from random import randint
-from urllib.parse import urlparse
+from urlparse import urlparse
 #from urlparse import urlparse
 def get_source_ip():
     try:
@@ -31,7 +31,7 @@ def parse_raw_url(raw_url):
 
 def checksum(msg):
     if len(msg) % 2 == 1:
-        msg += '\0'.encode()
+        msg += '\0'#.encode()
     s = 0
     s = sum(array.array("H", msg))
     s = (s >> 16) + (s & 0xffff)
@@ -46,12 +46,11 @@ def get_valid_port():
     port = randint(1024, 65535)
     return port
 
-def convert_bytes_to_str(data, l):
-    return get_hex_string_from_int(int.from_bytes(data, byteorder='big'), l)
+#def convert_bytes_to_str(data, l):
+#    return get_hex_string_from_int(int.from_bytes(data, byteorder='big'), l)
 
-def get_hex_string_from_int(i, length):
-    if length == 0:
-        return ""
-    result = hex(i)[2:]
-    result = "0" * (length - len(result)) + result
-    return result
+#def get_hex_string_from_int(i, length):
+#        return ""
+#    result = hex(i)[2:]
+#    result = "0" * (length - len(result)) + result
+#    return result

@@ -35,8 +35,9 @@ class TCPSocket:
     def send_request(self, data):
         self.prev_data = data
         # initialize
-        print ("data:")
+        print ("send HTTP request:")
         print (data)
+        print ("----------------------------------")
         tcp_pack = self.initialize_tcp_pack()
         tcp_pack.tcp_ack = 1
         tcp_pack.tcp_psh = 1
@@ -73,7 +74,8 @@ class TCPSocket:
         # timeout
         if not tcp_pack:
             return
-
+        if not len(tcp_pack.data):
+            return
         #print (str(tcp_pack.tcp_ack_seq) + "==" + str(self.seq_num) + "+" + str(len(self.prev_data)))
         if tcp_pack.tcp_ack_seq == self.seq_num + len(self.prev_data):
             self.seq_num = tcp_pack.tcp_ack_seq
@@ -83,7 +85,6 @@ class TCPSocket:
         else :
             print ("Incorrect SYN/ACK sequence")
             return 
-            #sys.exit(0)
         returned_data = tcp_pack.data
         # initialize
         tcp_pack = self.initialize_tcp_pack()
@@ -190,6 +191,8 @@ class TCPPack(object):
         self.data = ''
         self.tcp_flags = 0
 
+        self.is_valid = 1
+
     def pack(self, usrdata = ''):
         self.tcp_flags = self.tcp_fin + \
                     (self.tcp_syn << 1) + \
@@ -221,7 +224,7 @@ class TCPPack(object):
                     placeholder, \
                     protocol, \
                     tcp_length)
-        psh = psh + tcp_header + usrdata.encode()
+        psh = psh + tcp_header + usrdata#.encode()
         
 
         self.tcp_checksum = checksum(psh)
@@ -239,7 +242,7 @@ class TCPPack(object):
                      pack('!H', self.tcp_urg_ptr)
         self.data = usrdata
 
-        return tcp_header + usrdata.encode()
+        return tcp_header + usrdata#.encode()
 
     def unpack(self, data):
         tcph = unpack(self.format+'HH', data[0:20])
@@ -265,9 +268,13 @@ class TCPPack(object):
         self.tcp_urg = (self.tcp_flags & 32) >> 5 
 
         # TODO checksum
-        data_check = data[0:16] + pack('H', 0) + data[18:]
-        check_valid = checksum(data_check)
+        #psh_h = pack(self.psh_format, self.src_ip, self.dst_ip, 0, 6, self.tcp_offset_res*4 + len(self.data))
+        #pkt_check = data[:16] + pack('H', 0) + data[18:]
+        #check_valid = checksum(psh_h + pkt_check)
         #if check_valid != self.tcp_checksum:
+        #    print(self.tcp_checksum)
+        #    print(check_valid)
         #    print ("broken TCP packet")
+
         
         

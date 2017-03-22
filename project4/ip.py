@@ -119,14 +119,14 @@ class IPv4Packet(object):
         self.ip_checksum = iph[7]
         self.ip_saddr = socket.inet_ntoa(iph[8])
         self.ip_daddr = socket.inet_ntoa(iph[9])
-        self.data = data[self.ip_ihl*4:]
+        self.data = data[self.ip_ihl*4:self.ip_tot_len]
 
         # checksum validation
         checksum_holder = 0
-        data_check = data[:10] + pack('H', 0) + data[12:]
+        data_check = data[:self.ip_ihl*4]
         check_valid = checksum(data_check)
         # TODO valid checksum
-        #if check_valid != self.ip_checksum:
-        #    print("broken packet")
+        if check_valid != 0x000:
+            print("broken packet")
 
 
