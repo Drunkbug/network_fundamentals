@@ -14,7 +14,7 @@ class RawSocket(object):
         self.dest_ip = ''
         self.filename = ''
         self.ack_timeout = 60
-        self.data = ''
+        self.data = b''
         self.sock = None
 
     def http_get(self):
@@ -46,7 +46,7 @@ class RawSocket(object):
         start_time = time.time()
         #while time.time() - start_time <= self.ack_timeout:
         flag = 4
-        while time.time() - start_time<=15:
+        while time.time() - start_time<=20:
             data = self.sock.recv_data()
             if data:
                 if data.find('\r\n\r\n') >= 0:
@@ -55,12 +55,9 @@ class RawSocket(object):
                     self.data += content
                 else:
                     self.data += data
-                
-
             flag -= 1
-        print ("======================================")
-        #print (binascii.unhexlify(self.data).decode('utf8'))
-        #print (self.data)
+        #html_start = self.data.find(b"\x0d\x0a\x0d\x0a")
+        #self.data = self.data[html_start + 4:]
         f = open('test.txt', 'w')
         f.write(self.data)
         f.close()

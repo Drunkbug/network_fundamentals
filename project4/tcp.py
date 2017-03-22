@@ -20,8 +20,9 @@ class TCPSocket:
         # seq number and ack number for handle out of order packets
         self.seq_num = 0
         self.ack = 0
-        self.seq_acc = 0
-        self.ack_acc = 0
+        self.seq_acc = -1
+        self.ack_acc = -1
+        self.ack_count = 0
         #self.syn = 0
         # TCP congestion control
         self.cwnd = 1
@@ -44,7 +45,15 @@ class TCPSocket:
         tcp_pack.data = data
         # wrap ip header and send request
         self.send(tcp_pack)
-        self.recv_data()
+        recv_pkt = TCPPack()
+        recv_pkt = self.recv()#ip_socket.receive()
+        if  recv_pkt.tcp_ack_seq == self.seq_num + len(data):
+            self.seq_num = tcp_pack.tcp_ack_seq
+            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
+        else:
+            print ("resend HTTP request")
+            self.send(tcp_pack)
+            
 
         
     def send(self, tcp_pack):
@@ -55,11 +64,8 @@ class TCPSocket:
         tcp_pack = self.initialize_tcp_pack()
         start_time = time.time()
         recv_pkt = None
-        while 1:
-            if time.time() - start_time >= self.rto:
-                print ("Time out, change cwnd to 1")
-                self.cwnd = 1
-                return 
+        while time.time() - start_time <= self.rto:
+            #recv_pkt = TCPPack()
             recv_pkt = self.ip_socket.receive()
             if (recv_pkt):
                 tcp_pack.unpack(recv_pkt)
@@ -69,29 +75,39 @@ class TCPSocket:
 
     # receive data from sender 
     def recv_data(self):
-        # receive packet
-        tcp_pack = self.recv()
-        # timeout
-        if not tcp_pack:
-            return
-        if not len(tcp_pack.data):
-            return
-        #print (str(tcp_pack.tcp_ack_seq) + "==" + str(self.seq_num) + "+" + str(len(self.prev_data)))
-        if tcp_pack.tcp_ack_seq == self.seq_num + len(self.prev_data):
-            self.seq_num = tcp_pack.tcp_ack_seq
-            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
-            #print (tcp_pack.data)
-            print (len(tcp_pack.data))
-        else :
-            print ("Incorrect SYN/ACK sequence")
-            return 
-        returned_data = tcp_pack.data
-        # initialize
-        tcp_pack = self.initialize_tcp_pack()
-        tcp_pack.tcp_ack = 1
-        self.prev_data = tcp_pack.data
-        self.send(tcp_pack)
-        return returned_data 
+        data_acc = ''
+        send_pack = TCPPack()
+        while 1:
+            if self.ack_count > 1:
+                send_pack = self.initialize_tcp_pack()
+                send_pack.tcp_ack_seq = self.ack_acc
+                send_pack.tcp_seq = self.seq_acc
+                send_pack.tcp_ack = 1
+                self.send(send_pack)
+                self.ack_count -= 1
+            # receive packet
+            recv_pack = TCPPack()
+            recv_pack = self.recv()
+                
+
+            #if not tcp_pack or not len(tcp_pack.data):
+            #    return
+            if  recv_pack.tcp_seq == self.ack:
+                data_acc += recv_pack.data
+            else :
+                print ("Incorrect SYN/ACK sequence")
+                #tcp_pack = self.initialize_tcp_pack()
+                #tcp_pack.tcp_ack = 1
+                #self.send(tcp_pack)
+                pass 
+            if self.ack_count > 0:
+                self.ack_acc = self.ack
+                self.seq_acc = self.seq_num
+            self.ack = recv_pack.tcp_seq + len(recv_pack.data)
+            self.seq_num = recv_pack.tcp_ack_seq
+            self.ack_count +=1
+            
+        return data_acc
 
 
     def fin(self):
@@ -250,6 +266,7 @@ class TCPPack(object):
         self.dst_port = tcph[1]
         self.tcp_seq = tcph[2]
         self.tcp_ack_seq = tcph[3]
+        #print self.tcp_ack_seq
         tcp_offset_res_ = tcph[4]
         self.tcp_flags = tcph [5]
         self.tcp_window = tcph[6]
@@ -267,14 +284,3 @@ class TCPPack(object):
         self.tcp_ack = (self.tcp_flags & 16) >> 4
         self.tcp_urg = (self.tcp_flags & 32) >> 5 
 
-        # TODO checksum
-        #psh_h = pack(self.psh_format, self.src_ip, self.dst_ip, 0, 6, self.tcp_offset_res*4 + len(self.data))
-        #pkt_check = data[:16] + pack('H', 0) + data[18:]
-        #check_valid = checksum(psh_h + pkt_check)
-        #if check_valid != self.tcp_checksum:
-        #    print(self.tcp_checksum)
-        #    print(check_valid)
-        #    print ("broken TCP packet")
-
-        
-        
