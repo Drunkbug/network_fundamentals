@@ -3,6 +3,7 @@ import socket, sys
 from struct import *
 from random import randint
 from util import get_source_ip, parse_raw_url, checksum, get_valid_port
+import time
 
 class IPSocket(object):
     def __init__(self):
@@ -40,13 +41,15 @@ class IPSocket(object):
     def receive(self, timeout=60):
         packet = IPv4Packet()
         # set 60s timeout
-        self.receive_socket.settimeout(timeout)
+        start_time = time.time()
         try:
             while 1:
+                if time.time() - start_time > 60:
+                    raise RuntimeError("Time out")
                 packed = self.receive_socket.recv(65535) 
                 packet.unpack(packed)
                 return packet.data
-        except socket.timeout:
+        except RuntimeError:
             print ("time out")
             return
 
