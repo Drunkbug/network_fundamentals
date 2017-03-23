@@ -32,7 +32,6 @@ class RawSocket(object):
         self.dest_ip, \
         self.filename, \
         self.path = parse_raw_url(self.raw_url)
-        print (self.dest_ip)
         # establish TCP socket
         self.sock = TCPSocket(self.raw_url)
         # establish connection 
@@ -46,18 +45,16 @@ class RawSocket(object):
         start_time = time.time()
         #while time.time() - start_time <= self.ack_timeout:
         flag = 4
-        while time.time() - start_time<=20:
+        while time.time() - start_time<=10:
             data = self.sock.recv_data()
             if data:
-                if data.find('\r\n\r\n') >= 0:
+                if 0:#data.find('\r\n\r\n') >= 0:
                     header = data[0:data.find('\r\n\r\n'):]
                     content = data[len(header):]
                     self.data += content
                 else:
                     self.data += data
             flag -= 1
-        #html_start = self.data.find(b"\x0d\x0a\x0d\x0a")
-        #self.data = self.data[html_start + 4:]
         f = open('test.txt', 'w')
         f.write(self.data)
         f.close()

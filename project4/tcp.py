@@ -28,7 +28,6 @@ class TCPSocket:
         self.cwnd = 1
         self.max_cwnd = 1000
         # set timeout in 60 seconds, if rto set cwnd to 1
-        # TODO maybe longer timeout?
         self.rto = 60
 
         self.prev_data= ''
@@ -63,9 +62,7 @@ class TCPSocket:
     def recv(self):
         tcp_pack = self.initialize_tcp_pack()
         start_time = time.time()
-        recv_pkt = None
         while time.time() - start_time <= self.rto:
-            #recv_pkt = TCPPack()
             recv_pkt = self.ip_socket.receive()
             if (recv_pkt):
                 tcp_pack.unpack(recv_pkt)
@@ -88,12 +85,14 @@ class TCPSocket:
             # receive packet
             recv_pack = TCPPack()
             recv_pack = self.recv()
+            if (recv_pack.tcp_fin):
+                break
                 
 
             #if not tcp_pack or not len(tcp_pack.data):
             #    return
             if  recv_pack.tcp_seq == self.ack:
-                data_acc += recv_pack.data
+                data_acc += recv_pack.data#.decode()
             else :
                 print ("Incorrect SYN/ACK sequence")
                 #tcp_pack = self.initialize_tcp_pack()
@@ -107,7 +106,7 @@ class TCPSocket:
             self.seq_num = recv_pack.tcp_ack_seq
             self.ack_count +=1
             
-        return data_acc
+            return data_acc
 
 
     def fin(self):
@@ -266,7 +265,6 @@ class TCPPack(object):
         self.dst_port = tcph[1]
         self.tcp_seq = tcph[2]
         self.tcp_ack_seq = tcph[3]
-        #print self.tcp_ack_seq
         tcp_offset_res_ = tcph[4]
         self.tcp_flags = tcph [5]
         self.tcp_window = tcph[6]

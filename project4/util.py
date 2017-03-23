@@ -3,8 +3,8 @@
 import socket
 import array
 from random import randint
+#from urllib.parse import urlparse
 from urlparse import urlparse
-#from urlparse import urlparse
 def get_source_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
