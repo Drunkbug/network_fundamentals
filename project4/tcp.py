@@ -47,8 +47,8 @@ class TCPSocket:
         recv_pkt = TCPPack()
         recv_pkt = self.recv()#ip_socket.receive()
         if  recv_pkt.tcp_ack_seq == self.seq_num + len(data):
-            self.seq_num = tcp_pack.tcp_ack_seq
-            self.ack = tcp_pack.tcp_seq + len(tcp_pack.data)
+            self.seq_num = recv_pkt.tcp_ack_seq
+            self.ack = recv_pkt.tcp_seq + len(recv_pkt.data)
         else:
             print ("resend HTTP request")
             self.send(tcp_pack)
@@ -75,13 +75,14 @@ class TCPSocket:
         data_acc = ''
         send_pack = TCPPack()
         while 1:
-            if self.ack_count > 1:
-                send_pack = self.initialize_tcp_pack()
-                send_pack.tcp_ack_seq = self.ack_acc
-                send_pack.tcp_seq = self.seq_acc
-                send_pack.tcp_ack = 1
-                self.send(send_pack)
-                self.ack_count -= 1
+            print "here"
+            #if 0:#self.ack_count > 1:
+            #    send_pack = self.initialize_tcp_pack()
+            #    send_pack.tcp_ack_seq = self.ack_acc
+            #    send_pack.tcp_seq = self.seq_acc
+            #    send_pack.tcp_ack = 1
+            #    self.send(send_pack)
+            #    self.ack_count -= 1
             # receive packet
             recv_pack = TCPPack()
             recv_pack = self.recv()
@@ -91,20 +92,26 @@ class TCPSocket:
 
             #if not tcp_pack or not len(tcp_pack.data):
             #    return
+            print "ack count:" + str(self.ack_count) + "tcp seq:" + str(recv_pack.tcp_seq) + "self ack:" + str(self.ack)
             if  recv_pack.tcp_seq == self.ack:
                 data_acc += recv_pack.data#.decode()
+                # send ack
+                self.ack = recv_pack.tcp_seq + len(recv_pack.data)
+                self.seq_num = recv_pack.tcp_ack_seq
+                send_pack = self.initialize_tcp_pack()
+                send_pack.tcp_ack = 1
+                self.send(send_pack)
             else :
                 print ("Incorrect SYN/ACK sequence")
-                #tcp_pack = self.initialize_tcp_pack()
-                #tcp_pack.tcp_ack = 1
-                #self.send(tcp_pack)
-                pass 
-            if self.ack_count > 0:
-                self.ack_acc = self.ack
-                self.seq_acc = self.seq_num
-            self.ack = recv_pack.tcp_seq + len(recv_pack.data)
-            self.seq_num = recv_pack.tcp_ack_seq
-            self.ack_count +=1
+                send_pack = self.initialize_tcp_pack()
+                send_pack.tcp_ack = 1
+                self.send(send_pack)
+            #if self.ack_count > 0:
+            #    self.ack_acc = self.ack
+            #    self.seq_acc = self.seq_num
+            #self.ack = recv_pack.tcp_seq + len(recv_pack.data)
+            #self.seq_num = recv_pack.tcp_ack_seq
+            #self.ack_count +=1
             
             return data_acc
 
