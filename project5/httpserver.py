@@ -3,7 +3,7 @@ import os
 import util
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-class HttpServerHandler(BaseHTTPRequestHandler):
+class MyHttpHandler(BaseHTTPRequestHandler):
 
     def __init__(self, port_, origin_):
         self.port = port_
@@ -37,7 +37,7 @@ class HttpServerHandler(BaseHTTPRequestHandler):
         return
 
 def run(port, origin, server_class=HTTPServer, handler_class=BaseHTTPRequestHandler):
-    server_handler = HttpServerHandler(port, origin)
+    server_handler = MyHttpHandler(port, origin)
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     https.serve_forever()
