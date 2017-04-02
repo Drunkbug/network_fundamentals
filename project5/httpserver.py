@@ -1,8 +1,8 @@
 import sys
 import os
-from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
-class HttpServerHandler(BaseHTTPrequestHandler):
+class HttpServerHandler(BaseHTTPRequestHandler):
     def __init__(self, port_, origin_):
         self.port = port_
         self.origin = origin_
