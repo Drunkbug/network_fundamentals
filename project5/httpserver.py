@@ -1,8 +1,10 @@
 import sys
 import os
+import util
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class HttpServerHandler(BaseHTTPRequestHandler):
+
     def __init__(self, port_, origin_):
         self.port = port_
         self.origin = origin_
@@ -29,42 +31,17 @@ class HttpServerHandler(BaseHTTPRequestHandler):
         f = open(cache_path, 'r')
         self.wfile.write(f.read())
         f.close()
-        
-
             
     def cacheFile(self, path):
         print("todo")  
         return
 
-
-def argparse(inputs):
-    port = 0
-    origin = ''
-    if len(inputs) == 5:
-        if inputs[1] == '-p':
-            port = int(inputs[2])
-        elif inputs[3] == '-p':
-            port = int(inputs[4])
-        else:
-            sys.exit("Usage: -p <port> -o <origin>")
-        if inputs[1] == '-o':
-            origin = inputs[2]
-        elif inputs[3] == '-o':
-            origin = inputs[4]
-        else:
-            sys.exit("Usage: -p <port> -o <origin>")
-    else:
-        sys.exit("Usage: -p <port> -o <origin>")
-    if port < 40000 or port > 65535:
-        sys.exit("Invalid port number. Range: 40000-65535.")
-    return port, origin 
-        
 def run(port, origin, server_class=HTTPServer, handler_class=BaseHTTPRequestHandler):
     server_handler = HttpServerHandler(port, origin)
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     https.serve_forever()
 
-port, origin = argparse(sys.argv)
+port, origin = util.argparse(sys.argv)
 run(port, origin)
 
