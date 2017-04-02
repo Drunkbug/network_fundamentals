@@ -42,6 +42,6 @@ def run(port, origin, server_class=HTTPServer, handler_class=BaseHTTPRequestHand
     httpd = server_class(server_address, handler_class)
     https.serve_forever()
 
-port, origin = util.argparse(sys.argv)
+port, origin = util.parse_http_server_input(sys.argv)
 run(port, origin)
 
