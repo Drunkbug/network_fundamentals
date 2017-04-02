@@ -4,7 +4,8 @@ import util
 
 class MyUDPHandler(BaseRequestHandler):
     def handle(self):
-        return
+        self.data = self.request.recv(1024).strip()
+        print (self.data)
 
 class DNSServer(object):
     def __init__(self, port_, domain_):
