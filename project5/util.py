@@ -1,5 +1,4 @@
 import sys
-
 def parse_http_server_input(inputs):
     port = 0
     origin = ''

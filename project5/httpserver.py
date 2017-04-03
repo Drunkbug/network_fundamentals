@@ -1,7 +1,8 @@
 import sys
 import os
-import util
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from util import *
+#from http.server import HTTPServer, BaseHTTPRequestHandler
+from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
 class MyHttpHandler(BaseHTTPRequestHandler):
 
@@ -42,6 +43,6 @@ def run(port, origin, server_class=HTTPServer, handler_class=BaseHTTPRequestHand
     httpd = server_class(server_address, handler_class)
     https.serve_forever()
 
-port, origin = util.parse_http_server_input(sys.argv)
+port, origin = parse_http_server_input(sys.argv)
 run(port, origin)
 
