@@ -2,6 +2,7 @@ import sys
 from util import *
 from dnsmessage import DNSMessageHandler
 from SocketServer import UDPServer, BaseRequestHandler
+#from socketserver import UDPServer, BaseRequestHandler
 
 # read and parse inputs
 inputs = sys.argv
@@ -19,7 +20,7 @@ class MyUDPHandler(BaseRequestHandler):
         
         dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
         dns_message_packet = dns_message_handler.build_dns_message(data)
-        print dns_message_packet
+        print repr(dns_message_packet)
 
         socket.sendto(dns_message_packet, self.client_address)
 

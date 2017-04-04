@@ -83,23 +83,24 @@ class DNSQuestion(object):
         self.qtype = 0
         self.qclass = 0
 
-    def fetch(self, data, domain):
+    def fetch(self, data):
         [self.qtype,
         self.qclass] = struct.unpack('!HH', data[-4:])
-        print ("---------")
-        print (data[:-4])
-        self.qname = domain
+        hex_qname = data[:-4]
+        #print repr(hex_qname)
 
-    def pack(self):
-        qname = encode_domain(self.qname)
+    def pack(self, domain):
+        qname = encode_domain(domain)
         question_packet = struct.pack('!HH', 
                                        self.qtype, 
                                        self.qclass)
+        print ("xxxx")
+        print (qname)
         return qname + question_packet
 
     def build(self, data, domain):
-        self.fetch(data, domain)
-        return self.pack()
+        self.fetch(data)
+        return self.pack(domain)
 
 
 class DNSAnswer(object):
@@ -131,6 +132,6 @@ class DNSAnswer(object):
                                      self.rdata)
         return answer_packet
 
-    def build(self, data, domain):
-        return self.pack(data, domain)
+    def build(self, domain, ip_address):
+        return self.pack(domain, ip_address)
 
