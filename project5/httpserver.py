@@ -54,7 +54,7 @@ class HTTPServer(object):
         while 1:
             try:
                 client_socket, client_address = self.http_server.accept()
-                http_request = self.http_server.recv(1024)
+                http_request = client_socket.recv(1024)
                 print (http_request)
             except KeyboardInterrupt:
                 self.http_server.close()
