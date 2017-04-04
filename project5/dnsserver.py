@@ -28,6 +28,7 @@ class DNSServer(object):
                 self.udp_server.sendto(dns_message_packet, client_address)
         except KeyboardInterrupt:
             self.udp_server.close()
+            sys.close(0)
 
 dns_server = DNSServer()                
 dns_server.build_server()
