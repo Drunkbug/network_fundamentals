@@ -1,4 +1,5 @@
 import sys
+
 def parse_http_server_input(inputs):
     port = 0
     origin = ''
@@ -61,3 +62,12 @@ def encode_domain(domain):
 def integer_to_hex(i):
     return hex(i)
 
+def get_http_request_path(request):
+    request = request.rstrip('\r\n\r\n')
+    fields = request.split('\r\n')
+    get_request = fields[0]
+    get_requests = get_request.split(' ')
+    if (get_requests[0] == 'GET'):
+        path = get_requests[1]
+        return path
+    return

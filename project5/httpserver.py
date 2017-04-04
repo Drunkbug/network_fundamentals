@@ -1,44 +1,24 @@
 import sys
 import os
 from util import *
-#from http.server import HTTPServer, BaseHTTPRequestHandler
-from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import socket
 
 PORT, ORIGIN = parse_http_server_input(sys.argv)
 
-class MyHttpHandler(BaseHTTPRequestHandler):
-
-    def __init__(self, port_, origin_):
-        self.port = port_
-        self.origin = origin_
-        
-    def httpGET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        # self.path: request path
-        # wfile writing a response back to the client
-        # use self.path to check if local cache
-        # if yes wfile cache
-        # else get from origin server
-
-        # os.path.isdir
-        cache_path = os.pardir + self.path
-        if(os.path.exists(cache_path)):
-            self.response(cache_path)
-        else:
-            cache_path = cacheFile(self.path)  
-            self.response(cache_path)
-
-    def response(self, path):
-        f = open(cache_path, 'r')
-        self.wfile.write(f.read())
-        f.close()
-            
-    def cacheFile(self, path):
-        print("todo")  
-        return
+# self.send_response(200)
+# self.send_header("Content-type", "text/html")
+# self.path: request path
+# wfile writing a response back to the client
+# use self.path to check if local cache
+# if yes wfile cache
+# else get from origin server
+# os.path.isdir
+# cache_path = os.pardir + self.path
+# if(os.path.exists(cache_path)):
+#    self.response(cache_path)
+# else:
+#    cache_path = cacheFile(self.path)  
+#    self.response(cache_path)
 
 class HTTPServer(object):
 
@@ -55,11 +35,13 @@ class HTTPServer(object):
             try:
                 client_socket, client_address = self.http_server.accept()
                 http_request = client_socket.recv(1024)
-                print (http_request)
+
+                request_path = get_http_request_path(http_request)
+                print (request_path)
+
             except KeyboardInterrupt:
                 self.http_server.close()
                 sys.close(0)
-                
         return
         
 
