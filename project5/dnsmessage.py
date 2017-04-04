@@ -122,7 +122,7 @@ class DNSAnswer(object):
         self.rclass = 0x0001
         self.ttl = 60
         self.rlength = 4
-        self.data = socket.inet_aton(ip_address)
+        self.rdata = socket.inet_aton(ip_address)
         answer_packet = struct.pack('!HHHLH4s', 
                                      self.rname,
                                      self.type, 
