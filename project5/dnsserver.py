@@ -15,9 +15,9 @@ class MyUDPHandler(BaseRequestHandler):
         client_address = format(self.client_address[0])
         
         dns_message_handler = DNSMessageHandler(DOMAIN, client_address)
-        dns_message_handler.build_dns_message(data)
+        dns_message_packet = dns_message_handler.build_dns_message(data)
 
-        socket.sendto(data.upper(), self.client_address)
+        socket.sendto(dns_message_packet, self.client_address)
 
 
 # establish DNS server

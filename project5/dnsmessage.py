@@ -13,25 +13,28 @@ class DNSMessageHandler(object):
 
     def build_header_data(self, header_data):
         dns_header = DNSHeader()
-        dns_header.build(header_data)
-        return dns_header 
+        header_data = dns_header.build(header_data)
+        return header_data 
 
     def build_question_data(self, question_data):
         dns_question = DNSQuestion()
-        dns_question.build(question_data, self.domain)
-        return dns_question 
+        question_data = dns_question.build(question_data, self.domain)
+        return question_data 
 
-    def build_answer_data(self, answer_data):
+    def build_answer_data(self):
         dns_answer = DNSAnswer()
-        dns_answer.pack()
-        return dns_answer 
+        answer_data = dns_answer.build(self.domain, self.client_address)
+        return answer_data
 
     def build_dns_message(self, data):
         self.dns_header_data = data[0:12]
         self.dns_question_data = data[12:]
-        header_pack = self.build_header_data(self.dns_header_data)
+
+        header_data = self.build_header_data(self.dns_header_data)
         question_data = self.build_question_data(self.dns_question_data)
         answer_data = self.build_answer_data()
+
+        return header_data + question_data + answer_data
         
 
 class DNSHeader(object):
@@ -71,7 +74,7 @@ class DNSHeader(object):
 
     def build(self, data):
         self.fetch(data)
-        self.pack()
+        return self.pack()
 
 class DNSQuestion(object):
 
@@ -81,10 +84,6 @@ class DNSQuestion(object):
         self.qclass = 0
 
     def fetch(self, data, domain):
-        print ("dns question data length:")
-        print (len(data))
-        print ("dns question data:")
-        print (data)
         [self.qtype,
         self.qclass,
         ending] = struct.unpack('!hhs', data)
@@ -99,7 +98,7 @@ class DNSQuestion(object):
 
     def build(self, data, domain):
         self.fetch(data, domain)
-        self.pack()
+        return self.pack()
 
 
 class DNSAnswer(object):
@@ -115,17 +114,21 @@ class DNSAnswer(object):
     def fetch(self, data):
         return
 
-    def pack(self, ip_address):
+    def pack(self, domain, ip_address):
+        rname = encode_domain(domain)
         self.type = 0x0001
-        self.aclass = 0x0001
+        self.rclass = 0x0001
         self.ttl = 60
-        self.rlength = 0
+        self.rlength = 4
         self.data = ip_address
         answer_packet = struct.pack('!hhLh4s', 
                                      self.type, 
-                                     self.aclass,
+                                     self.rclass,
                                      self.ttl,
                                      self.rlength,
                                      self.rdata)
-        return answer_packet
+        return rname + answer_packet
+
+    def build(self, data, domain):
+        return self.pack(data, domain)
 
