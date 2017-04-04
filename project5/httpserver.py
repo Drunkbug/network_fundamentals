@@ -40,12 +40,6 @@ class MyHttpHandler(BaseHTTPRequestHandler):
         print("todo")  
         return
 
-def run(port, origin, server_class=HTTPServer, handler_class=BaseHTTPRequestHandler):
-    server_handler = MyHttpHandler(port, origin)
-    server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
-    https.serve_forever()
-
 class HTTPServer(object):
 
     def __init__(self):
@@ -56,6 +50,7 @@ class HTTPServer(object):
         self.http_server.bind(('', PORT))
 
     def serve_forever(self):
+        self.http_server.listen(1)
         while 1:
             try:
                 client_socket, client_address = self.http_server.accept()
@@ -68,3 +63,6 @@ class HTTPServer(object):
         return
         
 
+http_server = HTTPServer()
+http_server.build_server()
+http_server.serve_forever()
