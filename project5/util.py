@@ -48,3 +48,16 @@ def parse_dns_server_input(inputs):
 
 def dns_input_usage():
     sys.exit("Usage: -p <port> -n <name>")
+ 
+def encode_domain(domain):
+    labels = domain.split('.')
+    tmp = ''
+    for label in labels:
+        tmp += integer_to_hex(len(label))
+        tmp += label
+    tmp += '0x00'
+    return tmp
+
+def integer_to_hex(i):
+    return hex(i)
+
