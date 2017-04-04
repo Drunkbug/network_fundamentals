@@ -1,15 +1,16 @@
 import sys
 import struct
+import socket
 from util import *
 
 class DNSMessageHandler(object):
 
-    def __init__(self, domain_, client_address_):
+    def __init__(self, domain_, ip_address_):
         self.dns_header_data = ''
         self.dns_question_data = ''
         self.dns_answer_data = ''
         self.domain = domain_
-        self.client_address = client_address_
+        self.ip_address = ip_address_
 
     def build_header_data(self, header_data):
         dns_header = DNSHeader()
@@ -23,7 +24,7 @@ class DNSMessageHandler(object):
 
     def build_answer_data(self):
         dns_answer = DNSAnswer()
-        answer_data = dns_answer.build(self.domain, self.client_address)
+        answer_data = dns_answer.build(self.domain, self.ip_address)
         return answer_data
 
     def build_dns_message(self, data):
@@ -54,16 +55,15 @@ class DNSHeader(object):
         self.qdcount,
         self.ancount,
         self.nscount,
-        self.arcount] = struct.unpack('!Hhhhhh', data)
+        self.arcount] = struct.unpack('!HHHHHH', data)
         print ("dns header id:")
         print (self.id)
 
     def pack(self):
         self.ancount = 1 
-        print ("dns pack flags")
-        print (self.flags)
+        self.flags = 0x8180
 
-        header_packet = struct.pack('!Hhhhhh', 
+        header_packet = struct.pack('!HHHHHH', 
                                      self.id, 
                                      self.flags, 
                                      self.qdcount, 
@@ -85,13 +85,14 @@ class DNSQuestion(object):
 
     def fetch(self, data, domain):
         [self.qtype,
-        self.qclass,
-        ending] = struct.unpack('!hhs', data)
+        self.qclass] = struct.unpack('!HH', data[-4:])
+        print ("---------")
+        print (data[:-4])
         self.qname = domain
 
     def pack(self):
         qname = encode_domain(self.qname)
-        question_packet = struct.pack('!hh', 
+        question_packet = struct.pack('!HH', 
                                        self.qtype, 
                                        self.qclass)
         return qname + question_packet
@@ -104,7 +105,7 @@ class DNSQuestion(object):
 class DNSAnswer(object):
 
     def __init__(self):
-        self.name = ''
+        self.rname = ''
         self.type = ''
         self.aclass = ''
         self.ttl = 0
@@ -115,19 +116,20 @@ class DNSAnswer(object):
         return
 
     def pack(self, domain, ip_address):
-        rname = encode_domain(domain)
+        self.rname = 0xC00C#encode_domain(domain)
         self.type = 0x0001
         self.rclass = 0x0001
         self.ttl = 60
         self.rlength = 4
-        self.data = ip_address
-        answer_packet = struct.pack('!hhLh4s', 
+        self.data = socket.inet_aton(ip_address)
+        answer_packet = struct.pack('!HHHLH4s', 
+                                     self.rname,
                                      self.type, 
                                      self.rclass,
                                      self.ttl,
                                      self.rlength,
                                      self.rdata)
-        return rname + answer_packet
+        return answer_packet
 
     def build(self, data, domain):
         return self.pack(data, domain)
