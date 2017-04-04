@@ -1,8 +1,0 @@
-#! /bin/bash
-
-host="cs5700cdnproject.ccs.neu.edu"
-
-ssh "$1@$host" "rm -rf ~/dns && mkdir dns"
-scp ./dnsserver.py $1@$host:~/dns/ \
-    ./util.py $1@$host:~/dns/ \
-    ./httpserver.py $1@$host:~/dns/
