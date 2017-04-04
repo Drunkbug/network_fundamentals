@@ -53,9 +53,9 @@ def encode_domain(domain):
     labels = domain.split('.')
     tmp = ''
     for label in labels:
-        tmp += integer_to_hex(len(label))
+        tmp += chr(len(label))
         tmp += label
-    tmp += '0x00'
+    tmp += '\x00'
     return tmp
 
 def integer_to_hex(i):
