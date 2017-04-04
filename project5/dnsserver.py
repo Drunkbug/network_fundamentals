@@ -14,9 +14,6 @@ udp_server.bind(('', PORT))
 try:
     while 1:
         data, client_address = udp_server.recvfrom(1024)
-        print ("data:")
-        print (data)
-        print (client_address)
         ip_address = '54.85.79.138'
         dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
         dns_message_packet = dns_message_handler.build_dns_message(data)

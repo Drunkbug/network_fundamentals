@@ -56,8 +56,6 @@ class DNSHeader(object):
         self.ancount,
         self.nscount,
         self.arcount] = struct.unpack('!HHHHHH', data)
-        print ("dns header id:")
-        print (self.id)
 
     def pack(self):
         self.ancount = 1 
@@ -94,8 +92,6 @@ class DNSQuestion(object):
         question_packet = struct.pack('!HH', 
                                        self.qtype, 
                                        self.qclass)
-        print ("xxxx")
-        print (qname)
         return qname + question_packet
 
     def build(self, data, domain):
@@ -121,8 +117,8 @@ class DNSAnswer(object):
         self.type = 0x0001
         self.rclass = 0x0001
         self.ttl = 60
-        self.rlength = 4
         self.rdata = socket.inet_aton(ip_address)
+        self.rlength = len(self.rdata)
         answer_packet = struct.pack('!HHHLH4s', 
                                      self.rname,
                                      self.type, 
