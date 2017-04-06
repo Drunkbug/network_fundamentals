@@ -1,55 +1,25 @@
 import sys
+import argparse
 
 def parse_http_server_input(inputs):
-    port = 0
-    origin = ''
-    if len(inputs) == 5:
-        if inputs[1] == '-p':
-            port = int(inputs[2])
-        elif inputs[3] == '-p':
-            port = int(inputs[4])
-        else:
-            http_input_usage()
-        if inputs[1] == '-o':
-            origin = inputs[2]
-        elif inputs[3] == '-o':
-            origin = inputs[4]
-        else:
-            http_input_usage()
-    else:
-        http_input_usage()
-    if port < 40000 or port > 65535:
+    parser = argparse.ArgumentParser(description='Http Server Inputs')
+    parser.add_argument('-p', type=int, metavar='<port>', help='Port Number from 40000-65535' , required=True)
+    parser.add_argument('-o', type=str, metavar='<origin>', help='Name of the origin server for your CND' , required=True)
+    args = parser.parse_args()
+    if args.p < 40000 or args.p > 65535:
         sys.exit("Invalid port number. Range: 40000-65535.")
-    return port, origin 
-
-def http_input_usage():
-    sys.exit("Usage: -p <port> -o <origin>")
+    return args.p, args.o 
 
 def parse_dns_server_input(inputs):
-    port = 0
-    origin = ''
-    if len(inputs) == 5:
-        if inputs[1] == '-p':
-            port = int(inputs[2])
-        elif inputs[3] == '-p':
-            port = int(inputs[4])
-        else:
-            dns_input_usage()
-        if inputs[1] == '-n':
-            origin = inputs[2]
-        elif inputs[3] == '-n':
-            origin = inputs[4]
-        else:
-            dns_input_usage()
-    else:
-        dns_input_usage()
-    if port < 40000 or port > 65535:
+    parser = argparse.ArgumentParser(description='DNS Server Inputs')
+    parser.add_argument('-p', type=int, metavar='<port>', help='Port Number from 40000-65535' , required=True)
+    parser.add_argument('-n', type=str, metavar='<name>', help='CND specific name' , required=True)
+    args = parser.parse_args()
+    if args.p < 40000 or args.p > 65535:
         sys.exit("Invalid port number. Range: 40000-65535.")
-    return port, origin 
+    return args.p, args.n
 
-def dns_input_usage():
-    sys.exit("Usage: -p <port> -n <name>")
- 
+
 def encode_domain(domain):
     labels = domain.split('.')
     tmp = ''
