@@ -5,25 +5,19 @@ import socket
 import json
 import urllib
 
-# self.send_response(200)
-# self.send_header("Content-type", "text/html")
-# self.path: request path
-# wfile writing a response back to the client
-# use self.path to check if local cache
-# if yes wfile cache
-# else get from origin server
-# os.path.isdir
-# cache_path = os.pardir + self.path
-# if(os.path.exists(cache_path)):
-#    self.response(cache_path)
-# else:
-#    cache_path = cacheFile(self.path)  
-#    self.response(cache_path)
-
 CONST_10MB_IN_BYTES = 10485760
 
 
 class UrlData:
+    """
+    Construct a url data object
+    :type url_list: list
+    :param url_list: the list of url
+    :type data: str
+    :param data: the data of html
+    :type hit_count: number
+    :param hit_count: the hit count of the data
+    """
     def __init__(self, url_list, data, hit_count):
         self.urlList = url_list
         self.data = data
@@ -31,10 +25,16 @@ class UrlData:
 
 
 class CacheManager:
+    """
+    Construct a CacheManager
+    """
     def __init__(self):
         self.cacheFileHandler = CacheFileHandler()
         self.cacheData = self.__load_cache_file()
 
+    """
+    load the cache file
+    """
     def __load_cache_file(self):
         try:
             j_string = json.loads(self.cacheFileHandler.read())
@@ -46,9 +46,19 @@ class CacheManager:
         except:
             return []
 
+    """
+    save cache data in the file
+    """
     def __save_cache_data__(self):
-        self.cacheFileHandler.write(self.__to_json_string_cacheData())
+        self.cacheFileHandler.write(self.__to_json_string_cacheData__())
 
+    """
+    add url and data to the cache file
+    :type url: string
+    :param url: the url
+    :type data: str
+    :param data: the data of html
+    """
     def add_url_data(self, url, data):
         flag = False
         # go through each urlData in the list
@@ -68,33 +78,56 @@ class CacheManager:
         self.__larger_than_10mb_handler()
         self.__save_cache_data__()
 
+    """
+    handle the 10mb cache
+    TODO need to remove some data
+    """
     def __larger_than_10mb_handler(self):
         sorted(self.cacheData, key=lambda ud: ud.hitCount, reverse=True)
-        j_string = self.__to_json_string_cacheData()
+        j_string = self.__to_json_string_cacheData__()
         if sys.getsizeof(j_string) > CONST_10MB_IN_BYTES:
             # TODO remove some data to keep the file size under 10MB
             print('TODO remove some data to keep the file size under 10MB')
 
+    """
+    check whether the url is already in cache
+    :type url: string
+    :param url: the url
+    """
     def is_url_in_cache(self, url):
         for ud in self.cacheData:
             if url in ud.urlList:
                 return True, ud.data
         return False, ""
 
-    def __to_json_string_cacheData(self):
+    """
+    convert cacheData to json
+    """
+    def __to_json_string_cacheData__(self):
         return json.dumps([ob.__dict__ for ob in self.cacheData])
 
 
 class CacheFileHandler:
+    """
+    Construct a CacheFileHandler objext
+    """
     def __init__(self):
         self.fileName = 'cacheData.dat'
 
+    """
+    read the cache data from file
+    """
     def read(self):
         cache_data = open(self.fileName, 'r')
         result = cache_data.read()
         cache_data.close()
         return result
 
+    """
+    write the data to the cache file
+    :type data: str
+    :param data: the data of html
+    """
     def write(self, data):
         cache_data = open(self.fileName, 'w')
         cache_data.write(data)
@@ -102,20 +135,35 @@ class CacheFileHandler:
 
 
 class HTTPServer(object):
-
+    """
+    Construct a HTTPServer object
+    """
     def __init__(self):
         self.http_server = None
         self.cache_manager = CacheManager()
 
+    """
+    build the http server
+    """
     def build_server(self):
         self.http_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.http_server.bind(('', PORT))
 
+    """
+    retrive the data from the destination host
+    :type url: string
+    :param url: the url
+    """
     def retrieve_data(self, url):
         response = urllib.urlopen(url)
         # Convert bytes to string type and string type to dict
         return response.read().decode('utf-8')
 
+    """
+    handle http request
+    :type http_request: string
+    :param http_request: the http_request content
+    """
     def handle_request(self, http_request):
         request_path = get_http_request_path(http_request)
         url = ORIGIN + request_path
@@ -125,6 +173,9 @@ class HTTPServer(object):
         self.cache_manager.add_url_data(url, data)
         return data
 
+    """
+    listen to a port
+    """
     def serve_forever(self):
         self.http_server.listen(1)
         while 1:
