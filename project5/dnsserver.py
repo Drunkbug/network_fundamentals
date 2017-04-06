@@ -18,6 +18,7 @@ class DNSServer(object):
     def build_server(self):
         """ init dns server class with socket"""
         self.udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        print (PORT)
         self.udp_server.bind(('', PORT))
 
     def serve_forever(self):
