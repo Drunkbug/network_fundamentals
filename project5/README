@@ -1,0 +1,18 @@
+======================Milestone=====================
+httpserver:
+    Use socket to establish http server.
+    Parsing and handler user http request.
+    Cache request data from origin server, or get data from local if already cached.
+    Send requested http answer and data back to client.
+
+dnsserver:
+    Use socket to establish dns server.
+    Receive client's dns request and parse each session.
+    Pack each fields and session and send back formalized response with IP address.
+
+Chanllenges:
+We spent a lot of time on understanding each fields in each DNS session,
+understanding how to formalize each fields and reply to client correctly.
+    
+
+
