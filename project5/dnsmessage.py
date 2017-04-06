@@ -235,4 +235,3 @@ class DNSAnswer(object):
             ip_address: A string represents the replica ip address
         """
         return self.pack(domain, ip_address)
-        """
