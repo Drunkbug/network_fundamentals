@@ -177,13 +177,10 @@ class HTTPServer(object):
     :type http_request: string
     :param http_request: the http_request content
     """
-    def handle_request(self, http_request):
-        request_path = get_http_request_path(http_request)
-        url = ORIGIN + request_path
+    def handle_request(self, url):
         is_in, data = self.cache_manager.is_url_in_cache(url)
         if not is_in:
             data = self.retrieve_data("http://" + url)
-        self.cache_manager.add_url_data(url, data)
         return data
 
     """
@@ -195,10 +192,12 @@ class HTTPServer(object):
             try:
                 client_socket, client_address = self.http_server.accept()
                 http_request = client_socket.recv(1024)
-                data = self.handle_request(http_request)
-                print(data)
+                request_path = get_http_request_path(http_request)
+                url = ORIGIN + request_path
+                data = self.handle_request(url)
                 client_socket.sendall(data)
                 client_socket.close()
+                self.cache_manager.add_url_data(url, data)
             except KeyboardInterrupt:
                 self.http_server.close()
                 return
