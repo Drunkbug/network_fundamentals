@@ -4,9 +4,12 @@ from util import *
 import socket
 import json
 import urllib
+import subprocess
+import re
 
 CONST_10MB_IN_BYTES = 10485760
 CONST_512KB_IN_BYTES = 524288
+CONST_RTT_API = '/leyiqiangshichenxiyuandeerzi'
 
 
 class UrlData:
@@ -183,6 +186,12 @@ class HTTPServer(object):
             data = self.retrieve_data("http://" + url)
         return data
 
+    def handle_rtt_request_from_dns(self, request):
+        client_ip = request[len(CONST_RTT_API):]
+        result = subprocess.check_output(["scamper", "-c", "ping -c 1", "-i", client_ip])
+        rtt = re.findall("min/avg/max/stddev = \d+\.\d+/(\d+\.\d+)", result)
+        return rtt
+
     """
     listen to a port
     """
@@ -193,11 +202,16 @@ class HTTPServer(object):
                 client_socket, client_address = self.http_server.accept()
                 http_request = client_socket.recv(1024)
                 request_path = get_http_request_path(http_request)
-                url = ORIGIN + request_path
-                data = self.handle_request(url)
-                client_socket.sendall(data)
-                client_socket.close()
-                self.cache_manager.add_url_data(url, data)
+                if CONST_RTT_API in request_path:
+                    rtt = self.handle_rtt_request_from_dns(request_path)
+                    client_socket.sendall(rtt)
+                    client_socket.close()
+                else:
+                    url = ORIGIN + request_path
+                    data = self.handle_request(url)
+                    client_socket.sendall(data)
+                    client_socket.close()
+                    self.cache_manager.add_url_data(url, data)
             except KeyboardInterrupt:
                 self.http_server.close()
                 return
