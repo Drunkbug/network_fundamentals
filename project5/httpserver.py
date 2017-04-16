@@ -171,7 +171,7 @@ class HTTPServer(object):
     :param url: the url
     """
     def retrieve_data(self, url):
-        response = urllib.urlopen(url+":8080")
+        response = urllib.urlopen(url)
         # Convert bytes to string type and string type to dict
         return response.read().decode('utf-8')
 
@@ -183,7 +183,7 @@ class HTTPServer(object):
     def handle_request(self, url):
         is_in, data = self.cache_manager.is_url_in_cache(url)
         if not is_in:
-            data = self.retrieve_data("http://" + url)
+            data = self.retrieve_data("http://" + url).encode('utf-8')
         return data
 
     def handle_rtt_request_from_dns(self, request):
@@ -207,7 +207,7 @@ class HTTPServer(object):
                     client_socket.sendall(rtt)
                     client_socket.close()
                 else:
-                    url = ORIGIN + request_path
+                    url = ORIGIN + ":8080" + request_path
                     data = self.handle_request(url)
                     client_socket.sendall(data)
                     client_socket.close()
