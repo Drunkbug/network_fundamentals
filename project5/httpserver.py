@@ -171,7 +171,7 @@ class HTTPServer(object):
     :param url: the url
     """
     def retrieve_data(self, url):
-        response = urllib.urlopen(url)
+        response = urllib.urlopen(url+":8080")
         # Convert bytes to string type and string type to dict
         return response.read().decode('utf-8')
 
