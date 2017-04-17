@@ -7,7 +7,7 @@ import urllib
 import subprocess
 import re
 
-CONST_10MB_IN_BYTES = 10485760
+CONST_10MB_IN_BYTES = 1048576
 CONST_512KB_IN_BYTES = 524288
 CONST_RTT_API = '/leyiqiangshichenxiyuandeerzi'
 
@@ -91,7 +91,7 @@ class CacheManager:
     TODO need to remove some data
     """
     def __larger_than_10mb_handler(self):
-        sorted(self.cacheData, key=lambda ud: ud.hitCount, reverse=True)
+        self.cacheData = sorted(self.cacheData, key=lambda ud: ud.hitCount, reverse=True)
         j_string = self.__to_json_string_cacheData__()
         cache_bytes_size = sys.getsizeof(j_string)
         if cache_bytes_size > CONST_10MB_IN_BYTES:
