@@ -2,6 +2,7 @@ import sys
 from util import *
 from dnsmessage import DNSMessageHandler
 from measureserver import MeasureServer
+from geolocation import GeoLocator
 import socket
 
 EC2_HOSTS = ["ec2-54-166-234-74.compute-1.amazonaws.com",
@@ -25,12 +26,17 @@ class DNSServer(object):
     """
     def __init__(self):
         self.udp_server = None
+        self.locator = None
 
     def build_server(self):
         """ init dns server class with socket"""
         self.udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print (PORT)
         self.udp_server.bind(('', PORT))
+
+    def get_locations(self):
+        self.locator = GeoLocator(EC2_HOSTS)
+        self.locator.get_ec2_locations()
 
     def serve_forever(self):
         """ parsing client information and request
@@ -43,8 +49,11 @@ class DNSServer(object):
                 measure_server = MeasureServer(PORT)
                 print (measure_server)
                 ip_address = measure_server.best_replica(address_tuple[0])
-                # TODO get top three closest locations
-                top_three_hosts = 
+                # get top three closest locations
+                self.locator.reset()
+                self.locator.get_distances_to_client(address_tuple[0])
+                top_three_locations_tuple = self.get_top_three_locations()
+                top_three_hosts = [tup[0] for tup in top_three_hosts]
                 # use active measurement to get latency
                 dns_message_handler = DNSMessageHandler(DOMAIN, ip_address, top_three_hosts)
                 # parse and bulid dns message
@@ -63,4 +72,5 @@ if __name__ == '__main__':
     # start dns server
     dns_server = DNSServer()
     dns_server.build_server()
+    dns_server.get_locations()
     dns_server.serve_forever()
