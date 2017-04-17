@@ -7,8 +7,9 @@ import urllib
 import subprocess
 import re
 
-CONST_10MB_IN_BYTES = 1048576
+CONST_10MB_IN_BYTES = 10485760
 CONST_512KB_IN_BYTES = 524288
+
 CONST_RTT_API = '/leyiqiangshichenxiyuandeerzi'
 
 
@@ -26,7 +27,6 @@ class UrlData:
         self.urlList = url_list
         self.data = data
         self.hitCount = hit_count
-        self.is_data_stored = True
 
 
 class CacheManager:
@@ -70,11 +70,10 @@ class CacheManager:
         for ud in self.cacheData:
             if url in ud.urlList:
                 flag = True
-                if not ud.is_data_stored:
+                if ud.data == "":
                     ud.data = data
-                    ud.is_data_stored = True
                 ud.hitCount += 1
-            elif ud.is_data_stored and ud.data == data:
+            elif ud.data == "" and ud.data == data:
                 flag = True
                 ud.hitCount += 1
                 ud.urlList.append(url)
@@ -98,10 +97,9 @@ class CacheManager:
             # remove extra 512kb
             bytes_size_need_to_be_removed = cache_bytes_size - CONST_10MB_IN_BYTES + CONST_512KB_IN_BYTES
             for ud in reversed(self.cacheData):
-                if ud.is_data_stored:
+                if ud.data != "":
                     bytes_size_need_to_be_removed -= sys.getsizeof(ud.data)
                     ud.data = ""
-                    ud.is_data_stored = False
                 if bytes_size_need_to_be_removed <= 0:
                     return
 
@@ -113,7 +111,7 @@ class CacheManager:
     def is_url_in_cache(self, url):
         for ud in self.cacheData:
             # need to check whether the data is removed
-            if url in ud.urlList and ud.is_data_stored:
+            if ud.data != "" and url in ud.urlList:
                 return True, ud.data
         return False, ""
 
