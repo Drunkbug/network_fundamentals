@@ -10,8 +10,12 @@ class GeoLocator(object):
         self.distances_to_client = []
 
     def get_location_tuple(self, ip_address):
-        response = urllib.urlopen('http://ip-api.com/json/' + ip_address)
-        json_response = json.load(response)
+        try:
+            response = urllib.urlopen('http://ip-api.com/json/' + ip_address)
+            json_response = json.load(response)
+        except:
+            print ("Connection refused on host:" + str(ip_address))
+            pass
 
         if json_response['status'] == 'success':
             return (json_response['lon'], json_response['lat'])

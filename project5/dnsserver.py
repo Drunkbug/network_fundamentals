@@ -9,9 +9,6 @@ import socket
 ec2-54-166-234-74.compute-1.amazonaws.com"
 """
 EC2_HOSTS = ["ec2-52-90-80-45.compute-1.amazonaws.com",
-             "ec2-54-183-23-203.us-west-1.compute.amazonaws.com"]
-
-EC2_HOSTS_DUMP = ["ec2-52-90-80-45.compute-1.amazonaws.com",
              "ec2-54-183-23-203.us-west-1.compute.amazonaws.com",
              "ec2-54-70-111-57.us-west-2.compute.amazonaws.com",
              "ec2-52-215-87-82.eu-west-1.compute.amazonaws.com",
@@ -20,6 +17,16 @@ EC2_HOSTS_DUMP = ["ec2-52-90-80-45.compute-1.amazonaws.com",
              "ec2-52-62-198-57.ap-southeast-2.compute.amazonaws.com",
              "ec2-52-192-64-163.ap-northeast-1.compute.amazonaws.com",
              "ec2-54-233-152-60.sa-east-1.compute.amazonaws.com"]
+
+EC2_IPS = {"ec2-52-90-80-45.compute-1.amazonaws.com": "52.90.80.45",
+             "ec2-54-183-23-203.us-west-1.compute.amazonaws.com": "54.183.23.203",
+             "ec2-54-70-111-57.us-west-2.compute.amazonaws.com": "54.70.111.57",
+             "ec2-52-215-87-82.eu-west-1.compute.amazonaws.com": "52.215.87.82",
+             "ec2-52-28-249-79.eu-central-1.compute.amazonaws.com": "52.28.249.79",
+             "ec2-54-169-10-54.ap-southeast-1.compute.amazonaws.com": "54.169.10.54",
+             "ec2-52-62-198-57.ap-southeast-2.compute.amazonaws.com": "52.62.198.57",
+             "ec2-52-192-64-163.ap-northeast-1.compute.amazonaws.com": "52.192.64.163",
+             "ec2-54-233-152-60.sa-east-1.compute.amazonaws.com": "54.233.152.60"}
 
 class DNSServer(object):
 
@@ -58,7 +65,8 @@ class DNSServer(object):
                 top_three_hosts = [tup[0] for tup in top_three_locations_tuple]
                 # get latency
                 measure_server = MeasureServer(PORT, top_three_hosts)
-                ip_address = measure_server.best_replica(address_tuple[0])
+                host_name = measure_server.best_replica(address_tuple[0])
+                ip_address = EC2_IPS[host_name]
                 # message handler
                 dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
                 # parse and bulid dns message
