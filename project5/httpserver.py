@@ -42,7 +42,7 @@ class CacheManager:
     """
     def __load_cache_file(self):
         try:
-            j_string = json.loads(self.cacheFileHandler.read())
+            j_string = json_loads_byteified(self.cacheFileHandler.read())
             cache_data = []
             for url_data in j_string:
                 cache_data.append(UrlData(url_data['urlList'], url_data['data'], url_data['hitCount']))
@@ -65,8 +65,6 @@ class CacheManager:
     :param data: the data of html
     """
     def add_url_data(self, url, data):
-        if sys.getsizeof(data) >= CONST_10MB_IN_BYTES:
-            return
         flag = False
         # go through each urlData in the list
         for ud in self.cacheData:
@@ -76,7 +74,7 @@ class CacheManager:
                     ud.data = data
                     ud.is_data_stored = True
                 ud.hitCount += 1
-            elif ud.data.encode("utf-8") == data:
+            elif ud.is_data_stored and ud.data == data:
                 flag = True
                 ud.hitCount += 1
                 ud.urlList.append(url)
@@ -124,6 +122,7 @@ class CacheManager:
     """
     def __to_json_string_cacheData__(self):
         return json.dumps([ob.__dict__ for ob in self.cacheData])
+
 
 
 class CacheFileHandler:
@@ -221,6 +220,12 @@ class HTTPServer(object):
             except KeyboardInterrupt:
                 self.http_server.close()
                 return
+            except Exception as e:
+                print(e)
+            finally:
+                client_socket.close()
+
+
 
 if __name__ == '__main__':
 
