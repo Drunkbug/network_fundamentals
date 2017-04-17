@@ -72,6 +72,9 @@ class CacheManager:
         for ud in self.cacheData:
             if url in ud.urlList:
                 flag = True
+                if not ud.is_data_stored:
+                    ud.data = data
+                    ud.is_data_stored = True
                 ud.hitCount += 1
             elif ud.data.encode("utf-8") == data:
                 flag = True
