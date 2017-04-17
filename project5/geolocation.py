@@ -32,8 +32,6 @@ class GeoLocator(object):
             else:
                 self.distances_to_client.append((host, None))
 
-        print (self.distances_to_client)
-
     def calculate_distance(self, location_tuple1, location_tuple2):
         R = 6373
 
@@ -52,15 +50,13 @@ class GeoLocator(object):
         print("Result:", distance)
         return distance
 
-    def get_top_three_locations(self, hosts):
-        for host in hosts:
-            location_tuple = get_location_tuple(host)
-            print(location_tuple)
+    def get_top_three_locations(self):
+        max_dist = None
+        sorted_distances = sorted(self.distances_to_client, key=lambda tup:tup[1])
+        top_three_locations = sorted_distances[0:3]
+        print (top_three_locations)
+        return top_three_locations
 
+    def reset(self):
+        self.distances_to_client = []
 
-if __name__=='__main__':
-    locator = GeoLocator(['54.166.234.74']) 
-    locator.get_ec2_locations()
-    locator.get_distances_to_client("54.169.10.54")
-    
-     
