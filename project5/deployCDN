@@ -1,6 +1,61 @@
 #! /bin/bash
-host="ec2-52-90-80-45.compute-1.amazonaws.com"
+HOSTS=(ec2-54-84-248-26.compute-1.amazonaws.com)
+DNSSERVER="cs5700cdnproject.ccs.neu.edu"
+
+while [[ $# -gt 1 ]]
+do
+key="$1"
+
+case $key in
+    -p|--port)
+    PORT="$2"
+    shift
+    ;;
+    -o|--origin)
+    ORIGIN="$2"
+    shift
+    ;;
+    -n|--name)
+    NAME="$2"
+    shift
+    ;;
+    -u|--username)
+    USERNAME="$2"
+    shift
+    ;;
+    -i|--keyfile)
+    KEYFILE="$2"
+    shift
+    ;;
+    --default)
+    DEFAULT=YES
+    ;;
+    *)
+            # unknown option
+    ;;
+esac
+shift # past argument or value
+done
+
+#echo "deploy http server to ec2 hosts"
+#for HOST in "${HOSTS}"
+#do
+#    echo "$HOST"
+#    ssh -i $KEYFILE $USERNAME@$HOST 'rm -rf ~/cdn/'
+#    ssh -i $KEYFILE $USERNAME@$HOST 'mkdir ~/cdn/'
+#    scp -i $KEYFILE util.py $USERNAME@$HOST:'~/cdn/'
+#    scp -i $KEYFILE httpserver.py $USERNAME@$HOST:'~/cdn/'
+#    scp -i $KEYFILE httpserver $USERNAME@$HOST:'~/cdn/'
+#done
 
 
-ssh "drunkbug@$host" 'rm -rf ~/cdn'
-ssh "drunkbug@$host" 'mkdir cdn'
+echo "deploy dns server to dns host"
+    ssh -i $KEYFILE $USERNAME@$DNSSERVER 'rm -rf ~/cdn/'
+    ssh -i $KEYFILE $USERNAME@$DNSSERVER 'mkdir ~/cdn/'
+    scp -i $KEYFILE util.py $USERNAME@$DNSSERVER:'~/cdn/util.py'
+    scp -i $KEYFILE dnsserver.py $USERNAME@$DNSSERVER:'~/cdn/dnsserver.py'
+    scp -i $KEYFILE dnsserver $USERNAME@$DNSSERVER:'~/cdn/dnsserver'
+    scp -i $KEYFILE measureserver.py $USERNAME@$DNSSERVER:'~/cdn/measureserver.py'
+    scp -i $KEYFILE geolocation.py $USERNAME@$DNSSERVER:'~/cdn/geolocation.py'
+    scp -i $KEYFILE dnsmessage.py $USERNAME@$DNSSERVER:'~/cdn/dnsmessage.py'
+
