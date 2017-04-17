@@ -5,8 +5,13 @@ from measureserver import MeasureServer
 from geolocation import GeoLocator
 import socket
 
-EC2_HOSTS = ["ec2-54-166-234-74.compute-1.amazonaws.com",
-             "ec2-52-90-80-45.compute-1.amazonaws.com",
+"""
+ec2-54-166-234-74.compute-1.amazonaws.com"
+"""
+EC2_HOSTS = ["ec2-52-90-80-45.compute-1.amazonaws.com",
+             "ec2-54-183-23-203.us-west-1.compute.amazonaws.com"]
+
+EC2_HOSTS_DUMP = ["ec2-52-90-80-45.compute-1.amazonaws.com",
              "ec2-54-183-23-203.us-west-1.compute.amazonaws.com",
              "ec2-54-70-111-57.us-west-2.compute.amazonaws.com",
              "ec2-52-215-87-82.eu-west-1.compute.amazonaws.com",
@@ -55,7 +60,7 @@ class DNSServer(object):
                 measure_server = MeasureServer(PORT, top_three_hosts)
                 ip_address = measure_server.best_replica(address_tuple[0])
                 # message handler
-                dns_message_handler = DNSMessageHandler(DOMAIN, ip_address, top_three_hosts)
+                dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
                 # parse and bulid dns message
                 dns_message_packet = dns_message_handler.build_dns_message(data)
                 #print repr(dns_message_packet)
