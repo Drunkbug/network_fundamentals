@@ -42,8 +42,10 @@ done
 echo "run http"
 for HOST in "${HOSTS[@]}"
 do
-    ssh -i $KEYFILE $USERNAME@$HOST "~/cdn/httpserver -p $PORT -o $ORIGIN > /dev/null 2>&1" 
+    echo "$HOST"
+    ssh -i $KEYFILE -n -f $USERNAME@$HOST "sh -c 'cd ~/cdn/; nohup ./httpserver -p $PORT -o $ORIGIN &'"
+    #> /dev/null 2>&1
 done
 
 echo "run dns"
-    ssh -i $KEYFILE $USERNAME@$DNSSERVER "~/cdn/dnsserver -p $PORT -n $NAME > /dev/null 2>&1"
+    ssh -i $KEYFILE -n -f $USERNAME@$DNSSERVER "sh -c 'cd ~/cdn/; nohup ./dnsserver -p $PORT -n $NAME > /dev/null 2>&1 &'"
