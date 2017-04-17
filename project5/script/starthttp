@@ -1,3 +1,0 @@
-#!/bin/bash
-cd add_one_sec_http_server
-./httpserver $@
