@@ -10,7 +10,7 @@ class MeasureServer:
         self.hosts_latency = [] # list of tuples
 
     def send_request(self, client_ip):
-        for host in self.host:
+        for host in self.hosts:
             self.socket = socket.socket()
             self.socket.connect((host, self.port))
             self.socket.send("GET /leyiqiangshichenxiyuandeerzi" + str(client_ip) + " HTTP/1.1\r\n\r\n")
@@ -27,7 +27,7 @@ class MeasureServer:
         min_host = None
         # (hostname, latency)
         for host_tuple in self.hosts_latency:
-            if not min_host or host_tuple[1] < min_host[1]:
+            if not min_host or float(host_tuple[1]) < min_host[1]:
                 min_host = host_tuple 
         return min_host[0]
 

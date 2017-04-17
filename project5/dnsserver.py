@@ -46,15 +46,15 @@ class DNSServer(object):
             while 1:
                 data, address_tuple = self.udp_server.recvfrom(1024)
 
-                measure_server = MeasureServer(PORT)
-                print (measure_server)
-                ip_address = measure_server.best_replica(address_tuple[0])
                 # get top three closest locations
                 self.locator.reset()
                 self.locator.get_distances_to_client(address_tuple[0])
-                top_three_locations_tuple = self.get_top_three_locations()
-                top_three_hosts = [tup[0] for tup in top_three_hosts]
-                # use active measurement to get latency
+                top_three_locations_tuple = self.locator.get_top_three_locations()
+                top_three_hosts = [tup[0] for tup in top_three_locations_tuple]
+                # get latency
+                measure_server = MeasureServer(PORT, top_three_hosts)
+                ip_address = measure_server.best_replica(address_tuple[0])
+                # message handler
                 dns_message_handler = DNSMessageHandler(DOMAIN, ip_address, top_three_hosts)
                 # parse and bulid dns message
                 dns_message_packet = dns_message_handler.build_dns_message(data)
