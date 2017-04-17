@@ -1,5 +1,6 @@
 #! /bin/bash
-HOSTS=(ec2-54-84-248-26.compute-1.amazonaws.com)
+HOSTS=(ec2-52-90-80-45.compute-1.amazonaws.com
+    ec2-54-183-23-203.us-west-1.compute.amazonaws.com)
 DNSSERVER="cs5700cdnproject.ccs.neu.edu"
 
 while [[ $# -gt 1 ]]
@@ -37,16 +38,16 @@ esac
 shift # past argument or value
 done
 
-#echo "deploy http server to ec2 hosts"
-#for HOST in "${HOSTS}"
-#do
-#    echo "$HOST"
-#    ssh -i $KEYFILE $USERNAME@$HOST 'rm -rf ~/cdn/'
-#    ssh -i $KEYFILE $USERNAME@$HOST 'mkdir ~/cdn/'
-#    scp -i $KEYFILE util.py $USERNAME@$HOST:'~/cdn/'
-#    scp -i $KEYFILE httpserver.py $USERNAME@$HOST:'~/cdn/'
-#    scp -i $KEYFILE httpserver $USERNAME@$HOST:'~/cdn/'
-#done
+echo "deploy http server to ec2 hosts"
+for HOST in "${HOSTS[@]}"
+do
+    echo "$HOST"
+    ssh -i $KEYFILE $USERNAME@$HOST 'rm -rf ~/cdn/'
+    ssh -i $KEYFILE $USERNAME@$HOST 'mkdir ~/cdn/'
+    scp -i $KEYFILE util.py $USERNAME@$HOST:'~/cdn/'
+    scp -i $KEYFILE httpserver.py $USERNAME@$HOST:'~/cdn/'
+    scp -i $KEYFILE httpserver $USERNAME@$HOST:'~/cdn/'
+done
 
 
 echo "deploy dns server to dns host"
