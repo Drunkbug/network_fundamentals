@@ -41,7 +41,6 @@ done
 echo "deploy http server to ec2 hosts"
 for HOST in "${HOSTS[@]}"
 do
-    echo "$HOST"
     ssh -i $KEYFILE $USERNAME@$HOST 'rm -rf ~/cdn/'
     ssh -i $KEYFILE $USERNAME@$HOST 'mkdir ~/cdn/'
     scp -i $KEYFILE util.py $USERNAME@$HOST:'~/cdn/'

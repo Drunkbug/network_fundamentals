@@ -1,0 +1,49 @@
+#! /bin/bash
+#./runCDN -i ~/.ssh/id_rsa -u drunkbug -o "ec2-54-166-234-74.compute-1.amazonaws.com" -p "400123" -n "example.com"
+HOSTS=(ec2-52-90-80-45.compute-1.amazonaws.com
+    ec2-54-183-23-203.us-west-1.compute.amazonaws.com)
+DNSSERVER="cs5700cdnproject.ccs.neu.edu"
+
+while [[ $# -gt 1 ]]
+do
+key="$1"
+
+case $key in
+    -p|--port)
+    PORT="$2"
+    shift
+    ;;
+    -o|--origin)
+    ORIGIN="$2"
+    shift
+    ;;
+    -n|--name)
+    NAME="$2"
+    shift
+    ;;
+    -u|--username)
+    USERNAME="$2"
+    shift
+    ;;
+    -i|--keyfile)
+    KEYFILE="$2"
+    shift
+    ;;
+    --default)
+    DEFAULT=YES
+    ;;
+    *)
+            # unknown option
+    ;;
+esac
+shift # past argument or value
+done
+
+echo "run http"
+for HOST in "${HOSTS[@]}"
+do
+    ssh -i $KEYFILE $USERNAME@$HOST "~/cdn/httpserver -p $PORT -o $ORIGIN > /dev/null 2>&1" 
+done
+
+echo "run dns"
+    ssh -i $KEYFILE $USERNAME@$DNSSERVER "~/cdn/dnsserver -p $PORT -n $NAME > /dev/null 2>&1"
