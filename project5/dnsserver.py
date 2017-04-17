@@ -4,27 +4,16 @@ from dnsmessage import DNSMessageHandler
 from measureserver import MeasureServer
 import socket
 
-EC2_HOSTS = {"Origin": ("54.166.234.74", 
-                        "ec2-54-166-234-74.compute-1.amazonaws.com"),
-            "Virginia": ("52.90.80.45",
-                        "ec2-52-90-80-45.compute-1.amazonaws.com"),
-            "California": ("54.183.23.203",
-                        "ec2-54-183-23-203.us-west-1.compute.amazonaws.com"),
-            "Oregon": ("54.70.111.57",
-                        "ec2-54-70-111-57.us-west-2.compute.amazonaws.com"),
-            "Ireland": ("52.215.87.82", 
-                        "ec2-52-215-87-82.eu-west-1.compute.amazonaws.com"),
-            "Frankfurt": ("52.28.249.79", 
-                      "ec2-52-28-249-79.eu-central-1.compute.amazonaws.com"),
-            "Singapore": ("54.169.10.54", 
-                    "ec2-54-169-10-54.ap-southeast-1.compute.amazonaws.com"),
-            "Sydney": ("52.62.198.57", 
-                    "ec2-52-62-198-57.ap-southeast-2.compute.amazonaws.com"),
-            "Tokyo": ("52.192.64.163",
-                   "ec2-52-192-64-163.ap-northeast-1.compute.amazonaws.com"),
-            "SaoPaolo": ("54.233.152.60",
-                    "ec2-54-233-152-60.sa-east-1.compute.amazonaws.com")
-}
+EC2_HOSTS = ["ec2-54-166-234-74.compute-1.amazonaws.com",
+             "ec2-52-90-80-45.compute-1.amazonaws.com",
+             "ec2-54-183-23-203.us-west-1.compute.amazonaws.com",
+             "ec2-54-70-111-57.us-west-2.compute.amazonaws.com",
+             "ec2-52-215-87-82.eu-west-1.compute.amazonaws.com",
+             "ec2-52-28-249-79.eu-central-1.compute.amazonaws.com",
+             "ec2-54-169-10-54.ap-southeast-1.compute.amazonaws.com",
+             "ec2-52-62-198-57.ap-southeast-2.compute.amazonaws.com",
+             "ec2-52-192-64-163.ap-northeast-1.compute.amazonaws.com",
+             "ec2-54-233-152-60.sa-east-1.compute.amazonaws.com"]
 
 class DNSServer(object):
 
@@ -54,8 +43,11 @@ class DNSServer(object):
                 measure_server = MeasureServer(PORT)
                 print (measure_server)
                 ip_address = measure_server.best_replica(address_tuple[0])
+                # TODO get top three closest locations
+                top_three_hosts = 
+                # use active measurement to get latency
+                dns_message_handler = DNSMessageHandler(DOMAIN, ip_address, top_three_hosts)
                 # parse and bulid dns message
-                dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
                 dns_message_packet = dns_message_handler.build_dns_message(data)
                 #print repr(dns_message_packet)
                 self.udp_server.sendto(dns_message_packet, address_tuple)
