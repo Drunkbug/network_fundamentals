@@ -193,7 +193,10 @@ class HTTPServer(object):
         client_ip = request[len(CONST_RTT_API):]
         result = subprocess.check_output(["scamper", "-c", "ping -c 1", "-i", client_ip])
         rtt = re.findall("min/avg/max/stddev = \d+\.\d+/(\d+\.\d+)", result)
-        return rtt[0]
+        if not rtt:
+            return 99999
+        else:
+            return rtt[0]
 
     """
     listen to a port
