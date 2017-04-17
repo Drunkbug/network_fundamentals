@@ -1,0 +1,49 @@
+#! /bin/bash
+HOSTS=(ec2-52-90-80-45.compute-1.amazonaws.com
+    ec2-54-183-23-203.us-west-1.compute.amazonaws.com)
+DNSSERVER="cs5700cdnproject.ccs.neu.edu"
+
+while [[ $# -gt 1 ]]
+do
+key="$1"
+
+case $key in
+    -p|--port)
+    PORT="$2"
+    shift
+    ;;  
+    -o|--origin)
+    ORIGIN="$2"
+    shift
+    ;;  
+    -n|--name)
+    NAME="$2"
+    shift
+    ;;  
+    -u|--username)
+    USERNAME="$2"
+    shift
+    ;;  
+    -i|--keyfile)
+    KEYFILE="$2"
+    shift
+    ;;  
+    --default)
+    DEFAULT=YES
+    ;;  
+    *)  
+            # unknown option
+    ;;  
+esac
+shift # past argument or value
+done
+
+echo "stop http server"
+for HOST in "${HOSTS[@]}"
+do 
+    ssh -i $KEYFILE $USERNAME@$HOST "killall python > /dev/null 2>&1"
+done
+
+echo "stop dns server"
+ssh -i $KEYFILE $USERNAME@$DNSSERVER "killall python > /dev/null 2>&1"
+
