@@ -16,7 +16,7 @@ class MeasureServer:
                 self.socket.connect((host, self.port))
             except:
                 self.hosts_latency.append((host, 99999))
-                pass
+                continue
             self.socket.send("GET /leyiqiangshichenxiyuandeerzi" + str(client_ip) + " HTTP/1.1\r\n\r\n")
             self.get_rtt(host)
             self.socket.close()
