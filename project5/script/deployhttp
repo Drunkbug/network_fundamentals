@@ -5,5 +5,5 @@ mkdir add_one_sec_http_server
 cd add_one_sec_http_server
 echo 'downloading files'
 wget https://s3-us-west-1.amazonaws.com/cs5700chenxileyis3/httpserver.py https://s3-us-west-1.amazonaws.com/cs5700chenxileyis3/httpserver https://s3-us-west-1.amazonaws.com/cs5700chenxileyis3/util.py
-chmod 770 util.py httpserver.py httpserver
+chmod a+x util.py httpserver.py httpserver
 echo 'successfully deployed'
