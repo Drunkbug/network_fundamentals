@@ -1,2 +1,2 @@
-clean:
-	rm -rf *.pyc
+cleanup:
+	rm -rf ./*.pyc
