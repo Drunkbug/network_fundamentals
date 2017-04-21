@@ -9,6 +9,7 @@ import re
 
 CONST_10MB_IN_BYTES = 10485760
 CONST_512KB_IN_BYTES = 524288
+CONST_ITEM_LIST_MAX = 50000
 
 CONST_RTT_API = '/leyiqiangshichenxiyuandeerzi'
 
@@ -101,7 +102,9 @@ class CacheManager:
                     bytes_size_need_to_be_removed -= sys.getsizeof(ud.data)
                     ud.data = ""
                 if bytes_size_need_to_be_removed <= 0:
-                    return
+                    break
+            if len(self.cacheData) > CONST_ITEM_LIST_MAX:
+                self.cacheData = self.cacheData[0:int(CONST_ITEM_LIST_MAX/2)]
 
     """
     check whether the url is already in cache
