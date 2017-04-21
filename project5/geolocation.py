@@ -51,7 +51,6 @@ class GeoLocator(object):
 
         distance = R * c
 
-        print("Result:", distance)
         return distance
 
     def get_top_three_locations(self):

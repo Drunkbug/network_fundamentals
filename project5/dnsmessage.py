@@ -16,13 +16,14 @@ class DNSMessageHandler(object):
         ip_address: A string indicating client's ip address
     """
 
-    def __init__(self, domain_, ip_address_):
+    def __init__(self, domain_, ip_address_, ttl_):
         """ Init DNS message handler with domain and client's ip address"""
         self.dns_header_data = ''
         self.dns_question_data = ''
         self.dns_answer_data = ''
         self.domain = domain_
         self.ip_address = ip_address_
+        self.ttl = ttl_
 
     def build_header_data(self, header_data):
         """ Construct server dns header data 
@@ -48,7 +49,7 @@ class DNSMessageHandler(object):
         """ Construct server dns answer data 
         """
         dns_answer = DNSAnswer()
-        answer_data = dns_answer.build(self.domain, self.ip_address)
+        answer_data = dns_answer.build(self.domain, self.ip_address, self.ttl)
         return answer_data
 
     def build_dns_message(self, data):
@@ -156,7 +157,7 @@ class DNSQuestion(object):
         [self.qtype,
         self.qclass] = struct.unpack('!HH', data[-4:])
         self.qname = data[:-4]
-        #print repr(hex_qname)
+        print repr(self.qname)
 
     def pack(self, domain):
         """ pack question session
@@ -207,31 +208,32 @@ class DNSAnswer(object):
         """ fetch dns answer session """
         return
 
-    def pack(self, domain, ip_address):
+    def pack(self, domain, ip_address, ttl):
         """ pack dns answer session
 
         Args:
             domain: A string represents the domain name
             ip_address: A string represents the replica ip address
         """
-        self.rname = encode_domain(domain)
+        self.rname = 0xC00C#encode_domain(domain)
         self.type = 0x0001
         self.rclass = 0x0001
-        self.ttl = 60
+        self.ttl = ttl
         self.rdata = socket.inet_aton(ip_address)
         self.rlength = len(self.rdata)
-        answer_packet = struct.pack('!HHLH4s', 
+        answer_packet = struct.pack('!HHHLH4s', 
+                                     self.rname,
                                      self.type, 
                                      self.rclass,
                                      self.ttl,
                                      self.rlength,
                                      self.rdata)
-        return self.rname + answer_packet
+        return answer_packet
 
-    def build(self, domain, ip_address):
+    def build(self, domain, ip_address, ttl):
         """ build answer session
         Args:
             domain: A string represents the domain name
             ip_address: A string represents the replica ip address
         """
-        return self.pack(domain, ip_address)
+        return self.pack(domain, ip_address, ttl)

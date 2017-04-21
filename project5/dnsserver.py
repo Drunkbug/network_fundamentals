@@ -45,7 +45,6 @@ class DNSServer(object):
     def build_server(self):
         """ init dns server class with socket"""
         self.udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        print (PORT)
         self.udp_server.bind(('', PORT))
 
     def get_locations(self):
@@ -63,7 +62,8 @@ class DNSServer(object):
                 if (address_tuple[0] in self.client_replica_cache.keys() and 
                     time.time() - self.client_replica_cache[address_tuple[0]][1] <= 60):
                     ip_address = self.client_replica_cache[address_tuple[0]][0]
-                    self.send(ip_address, data, address_tuple)
+                    ttl = 60 - (int(time.time()) - int(self.client_replica_cache[address_tuple[0]][1]))
+                    self.send(ip_address, data, address_tuple, ttl)
                     continue
                 # get top three closest locations
                 self.locator.reset()
@@ -74,16 +74,16 @@ class DNSServer(object):
                 measure_server = MeasureServer(PORT, top_three_hosts)
                 host_name = measure_server.best_replica(address_tuple[0])
                 ip_address = EC2_IPS[host_name]
-                self.send(ip_address, data, address_tuple)
+                self.send(ip_address, data, address_tuple, 60)
                 self.client_replica_cache[address_tuple[0]] = (ip_address, time.time())
 
         except KeyboardInterrupt:
             self.udp_server.close()
             sys.close(0)
 
-    def send(self, ip_address, data, address_tuple):
+    def send(self, ip_address, data, address_tuple, ttl):
         # message handler
-        dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
+        dns_message_handler = DNSMessageHandler(DOMAIN, ip_address, ttl)
         # parse and bulid dns message
         dns_message_packet = dns_message_handler.build_dns_message(data)
         #print repr(dns_message_packet)
