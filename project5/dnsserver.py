@@ -5,6 +5,7 @@ from measureserver import MeasureServer
 from geolocation import GeoLocator
 import socket
 import time
+from IPy import IP
 
 """
 ec2-54-166-234-74.compute-1.amazonaws.com"
@@ -58,6 +59,8 @@ class DNSServer(object):
         try:
             while 1:
                 data, address_tuple = self.udp_server.recvfrom(1024)
+                ip = IP(address_tuple[0])
+                ip_type = ip.iptype()
 
                 if (address_tuple[0] in self.client_replica_cache.keys() and 
                     time.time() - self.client_replica_cache[address_tuple[0]][1] <= 60):
@@ -65,11 +68,13 @@ class DNSServer(object):
                     ttl = 60 - (int(time.time()) - int(self.client_replica_cache[address_tuple[0]][1]))
                     self.send(ip_address, data, address_tuple, ttl)
                     continue
-                # get top three closest locations
-                self.locator.reset()
-                self.locator.get_distances_to_client(address_tuple[0])
-                top_three_locations_tuple = self.locator.get_top_three_locations()
-                top_three_hosts = [tup[0] for tup in top_three_locations_tuple]
+                top_three_hosts = EC2_HOSTS
+                if ip_type != 'PRIVATE':
+                    # get top three closest locations
+                    self.locator.reset()
+                    self.locator.get_distances_to_client(address_tuple[0])
+                    top_three_locations_tuple = self.locator.get_top_three_locations()
+                    top_three_hosts = [tup[0] for tup in top_three_locations_tuple]
                 # get latency
                 measure_server = MeasureServer(PORT, top_three_hosts)
                 host_name = measure_server.best_replica(address_tuple[0])

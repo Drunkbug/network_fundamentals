@@ -1,7 +1,7 @@
 import sys
 import struct
 import socket
-from util import *
+from testutil import *
 
 class DNSMessageHandler(object):
     """ Class for handling DNS message
@@ -156,8 +156,7 @@ class DNSQuestion(object):
         """
         [self.qtype,
         self.qclass] = struct.unpack('!HH', data[-4:])
-        self.qname = data[:-4]
-        print repr(self.qname)
+        self.qname = data[:-2]
 
     def pack(self, domain):
         """ pack question session
@@ -215,20 +214,19 @@ class DNSAnswer(object):
             domain: A string represents the domain name
             ip_address: A string represents the replica ip address
         """
-        self.rname = 0xC00C#encode_domain(domain)
+        self.rname = encode_domain(domain)
         self.type = 0x0001
         self.rclass = 0x0001
         self.ttl = ttl
         self.rdata = socket.inet_aton(ip_address)
         self.rlength = len(self.rdata)
-        answer_packet = struct.pack('!HHHLH4s', 
-                                     self.rname,
+        answer_packet = struct.pack('!HHLH4s', 
                                      self.type, 
                                      self.rclass,
                                      self.ttl,
                                      self.rlength,
                                      self.rdata)
-        return answer_packet
+        return self.rname + answer_packet
 
     def build(self, domain, ip_address, ttl):
         """ build answer session
