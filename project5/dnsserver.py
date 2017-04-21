@@ -4,6 +4,7 @@ from dnsmessage import DNSMessageHandler
 from measureserver import MeasureServer
 from geolocation import GeoLocator
 import socket
+import time
 
 """
 ec2-54-166-234-74.compute-1.amazonaws.com"
@@ -39,6 +40,7 @@ class DNSServer(object):
     def __init__(self):
         self.udp_server = None
         self.locator = None
+        self.client_replica_cache = {}
 
     def build_server(self):
         """ init dns server class with socket"""
@@ -58,6 +60,11 @@ class DNSServer(object):
             while 1:
                 data, address_tuple = self.udp_server.recvfrom(1024)
 
+                if (address_tuple[0] in self.client_replica_cache.keys() and 
+                    time.time() - self.client_replica_cache[address_tuple[0]][1] <= 60):
+                    ip_address = self.client_replica_cache[address_tuple[0]][0]
+                    self.send(ip_address, data, address_tuple)
+                    continue
                 # get top three closest locations
                 self.locator.reset()
                 self.locator.get_distances_to_client(address_tuple[0])
@@ -67,16 +74,21 @@ class DNSServer(object):
                 measure_server = MeasureServer(PORT, top_three_hosts)
                 host_name = measure_server.best_replica(address_tuple[0])
                 ip_address = EC2_IPS[host_name]
-                # message handler
-                dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
-                # parse and bulid dns message
-                dns_message_packet = dns_message_handler.build_dns_message(data)
-                #print repr(dns_message_packet)
-                self.udp_server.sendto(dns_message_packet, address_tuple)
+                self.send(ip_address, data, address_tuple)
+                self.client_replica_cache[address_tuple[0]] = (ip_address, time.time())
+
         except KeyboardInterrupt:
             self.udp_server.close()
             sys.close(0)
 
+    def send(self, ip_address, data, address_tuple):
+        # message handler
+        dns_message_handler = DNSMessageHandler(DOMAIN, ip_address)
+        # parse and bulid dns message
+        dns_message_packet = dns_message_handler.build_dns_message(data)
+        #print repr(dns_message_packet)
+        self.udp_server.sendto(dns_message_packet, address_tuple)
+        
 
 if __name__ == '__main__':
     # read and parse inputs
