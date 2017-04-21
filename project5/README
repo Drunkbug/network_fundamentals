@@ -14,5 +14,29 @@ Chanllenges:
 We spent a lot of time on understanding each fields in each DNS session,
 understanding how to formalize each fields and reply to client correctly.
     
+Design dicision:
+In httpserver. We have a list of URLData in out cache. A URLData has three fields:
+URLList: a URLList is a list of url.
+Data: the data is the wget data.
+HitCount: the hitcount is the access count of the data.
 
+Every time we receive a request, we check whether the url is in
+the cache data. If the url is in the cache, we return the corresponding
+data from the cache. If it is not in the cache, we fetch the data from
+the original server. When we receive the data from the server, we check
+whether the data is in the cache. If the data is in the cache we add
+the new url to the list. If it is not, we create new URLData item.
+
+When the cache file is larger than 10MB, we remove the (file size - 10MB
+- 512KB) from the cache file. If the URLList's length is larger than
+50,000, we will remove the last 25,000 URLData from the list.
+
+Effectiveness:
+We use [time wget] to test the download time. With the data in the cache,
+we can reduce the download time from 0.7s to 0.1s.
+
+Future Improvements:
+1. We can use a special dictionary to implement the cache data. Since
+List data structure is not time efficient, it will take a long time to
+go through every item in the list
 
