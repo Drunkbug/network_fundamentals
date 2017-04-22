@@ -23,7 +23,7 @@ class DNSMessageHandler(object):
         self.dns_answer_data = ''
         self.domain = domain_
         self.ip_address = ip_address_
-        self.ttl = 60
+        self.ttl = ttl_
 
     def build_header_data(self, header_data):
         """ Construct server dns header data 
