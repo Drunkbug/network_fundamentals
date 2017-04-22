@@ -1,7 +1,7 @@
 import sys
 import struct
 import socket
-from testutil import *
+from util import *
 
 class DNSMessageHandler(object):
     """ Class for handling DNS message
@@ -23,7 +23,7 @@ class DNSMessageHandler(object):
         self.dns_answer_data = ''
         self.domain = domain_
         self.ip_address = ip_address_
-        self.ttl = ttl_
+        self.ttl = 60
 
     def build_header_data(self, header_data):
         """ Construct server dns header data 
@@ -156,7 +156,7 @@ class DNSQuestion(object):
         """
         [self.qtype,
         self.qclass] = struct.unpack('!HH', data[-4:])
-        self.qname = data[:-2]
+        self.qname = data[:-4]
 
     def pack(self, domain):
         """ pack question session
