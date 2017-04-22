@@ -79,6 +79,10 @@ class DNSServer(object):
                     self.locator.get_distances_to_client(address_tuple[0])
                     top_three_locations_tuple = self.locator.get_top_three_locations()
                     top_three_hosts = [tup[0] for tup in top_three_locations_tuple]
+                else:
+                    # handle private ip, if it's a private ip the client must locate at
+                    # the same place as DNS server(i.e. BOSTON)
+                    top_three_hosts = ["ec2-52-90-80-45.compute-1.amazonaws.com"]
                 # get latency
                 measure_server = MeasureServer(PORT, top_three_hosts)
                 host_name = measure_server.best_replica(address_tuple[0])
