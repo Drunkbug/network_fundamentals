@@ -42,16 +42,19 @@ class DNSServer(object):
         self.udp_server = None
         self.locator = None
         self.client_replica_cache = {}
-
+    
+    # build socket server 
     def build_server(self):
         """ init dns server class with socket"""
         self.udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp_server.bind(('', PORT))
 
+    # get geo locations
     def get_locations(self):
         self.locator = GeoLocator(EC2_HOSTS)
         self.locator.get_ec2_locations()
 
+    # run dns server
     def serve_forever(self):
         """ parsing client information and request
             send dns message back to client
@@ -69,6 +72,7 @@ class DNSServer(object):
                     self.send(socket.inet_aton(ip_address), data, address_tuple, ttl)
                     continue
                 top_three_hosts = EC2_HOSTS
+                # if it is a private ip
                 if ip_type != 'PRIVATE':
                     # get top three closest locations
                     self.locator.reset()
