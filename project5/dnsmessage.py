@@ -220,13 +220,14 @@ class DNSAnswer(object):
         self.ttl = ttl
         self.rdata = socket.inet_aton(ip_address)
         self.rlength = len(self.rdata)
-        answer_packet = struct.pack('!HHLH4s', 
+        answer_packet = struct.pack('!HHHLH4s', 
+                                     self.rname,
                                      self.type, 
                                      self.rclass,
                                      self.ttl,
                                      self.rlength,
                                      self.rdata)
-        return self.rname + answer_packet
+        return answer_packet
 
     def build(self, domain, ip_address, ttl):
         """ build answer session
