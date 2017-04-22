@@ -66,7 +66,7 @@ class DNSServer(object):
                     time.time() - self.client_replica_cache[address_tuple[0]][1] <= 60):
                     ip_address = self.client_replica_cache[address_tuple[0]][0]
                     ttl = 60 - (int(time.time()) - int(self.client_replica_cache[address_tuple[0]][1]))
-                    self.send(ip_address, data, address_tuple, ttl)
+                    self.send(socket.inet_aton(ip_address), data, address_tuple, ttl)
                     continue
                 top_three_hosts = EC2_HOSTS
                 if ip_type != 'PRIVATE':

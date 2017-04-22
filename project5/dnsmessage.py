@@ -214,7 +214,7 @@ class DNSAnswer(object):
             domain: A string represents the domain name
             ip_address: A string represents the replica ip address
         """
-        self.rname = encode_domain(domain)
+        self.rname = 0xC00C#encode_domain(domain)
         self.type = 0x0001
         self.rclass = 0x0001
         self.ttl = ttl
