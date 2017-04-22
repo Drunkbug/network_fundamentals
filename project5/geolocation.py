@@ -2,13 +2,16 @@ import socket
 import urllib
 import json
 from math import sin, cos, sqrt, atan2, radians
-
+# get the geo location from client ip
 class GeoLocator(object):
+
+    # initialize geo locator
     def __init__(self, ec2_hosts_):
         self.ec2_hosts = ec2_hosts_ 
         self.ec2_host_locations = {}
         self.distances_to_client = []
 
+    # get location from ip-api
     def get_location_tuple(self, ip_address):
         try:
             response = urllib.urlopen('http://ip-api.com/json/' + ip_address)
@@ -22,10 +25,12 @@ class GeoLocator(object):
         else:
             return None
 
+    # get geo location of EC2 hosts
     def get_ec2_locations(self):
         for ec2_host in self.ec2_hosts:
             self.ec2_host_locations[ec2_host] = self.get_location_tuple(ec2_host)
 
+    # get distance from ec2 to client
     def get_distances_to_client(self, client_address):
         client_location_tuple = self.get_location_tuple(client_address)
         for host in self.ec2_host_locations.keys():
@@ -36,6 +41,7 @@ class GeoLocator(object):
             else:
                 self.distances_to_client.append((host, None))
 
+    # calculate distance between ec2 host and client
     def calculate_distance(self, location_tuple1, location_tuple2):
         R = 6373
 
@@ -53,6 +59,7 @@ class GeoLocator(object):
 
         return distance
 
+    # get the top three closest ec2 host locations
     def get_top_three_locations(self):
         max_dist = None
         sorted_distances = sorted(self.distances_to_client, key=lambda tup:tup[1])
@@ -60,6 +67,7 @@ class GeoLocator(object):
         print (top_three_locations)
         return top_three_locations
 
+    # reset distance to client
     def reset(self):
         self.distances_to_client = []
 
