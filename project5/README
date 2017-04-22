@@ -10,15 +10,20 @@ dnsserver:
     Receive client's dns request and parse each session.
     Pack each fields and session and send back formalized response with IP address.
 
+
+=====================PROJECT 5=====================
 Chanllenges:
 We spent a lot of time on understanding each fields in each DNS session,
 understanding how to formalize each fields and reply to client correctly.
+Also, our dns header section shows Addition Section when we do dig on 
+ccis server, while it shows Answer Section on our own servers.
     
 Design dicision:
 In httpserver. We have a list of URLData in out cache. A URLData has three fields:
 URLList: a URLList is a list of url.
 Data: the data is the wget data.
 HitCount: the hitcount is the access count of the data.
+
 
 Every time we receive a request, we check whether the url is in
 the cache data. If the url is in the cache, we return the corresponding
@@ -31,12 +36,24 @@ When the cache file is larger than 10MB, we remove the (file size - 10MB
 - 512KB) from the cache file. If the URLList's length is larger than
 50,000, we will remove the last 25,000 URLData from the list.
 
+In DNS server. We use Active Measurement and Geo Location to select the best replica,
+when the server starts, it gets locations of all EC2 hosts. 
+When it receives request from client, it first calculate distance between client and
+all EC2 hosts, then select the top 3 clostest server. Then it sends HTTP request
+to HTTP server and let it calculate latency between client and the ec2 host. 
+Once DNS server get the latency of the three ec2 hosts, it select the one with lowest
+latency.
+
 Effectiveness:
 We use [time wget] to test the download time. With the data in the cache,
 we can reduce the download time from 0.7s to 0.1s.
+We use Active Measurement and Geo Location to select best replica
 
 Future Improvements:
 1. We can use a special dictionary to implement the cache data. Since
 List data structure is not time efficient, it will take a long time to
 go through every item in the list
 
+2. We can add Passive Measurement in DNS server
+
+3. We can find some better way to speed up dns respond time
