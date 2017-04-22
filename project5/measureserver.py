@@ -1,6 +1,6 @@
 import socket
 
-
+# server for contacting http host and get latency from http host to client
 class MeasureServer:
 
     def __init__(self, port_, hosts_=[]):
@@ -9,6 +9,7 @@ class MeasureServer:
         self.hosts = hosts_
         self.hosts_latency = [] # list of tuples
 
+    # send get to http host
     def send_request(self, client_ip):
         for host in self.hosts:
             self.socket = socket.socket()
@@ -21,12 +22,14 @@ class MeasureServer:
             self.get_rtt(host)
             self.socket.close()
 
+    # receive rtt info from http server
     def get_rtt(self, host):
         while 1:
             rtt = self.socket.recv(1024)
             self.hosts_latency.append((host, float(rtt)))
             return
 
+    # get the ec2 host with minimum latency
     def get_min_host(self):
         min_host = None
         # (hostname, latency)
@@ -35,7 +38,7 @@ class MeasureServer:
                 min_host = host_tuple 
         return min_host[0]
 
-
+    # get the best replica
     def best_replica(self, client_ip):
         self.send_request(client_ip)
         return self.get_min_host()
